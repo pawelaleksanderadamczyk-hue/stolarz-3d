@@ -146,7 +146,9 @@ export function LeftPanel() {
 const selectedBoardIds = useProjectStore((s) => s.selectedBoardIds);
 
 const activeSelectedId = selectedId ?? selectedBoardIds[0] ?? null;
-const board = project.boards.find((b) => b.id === activeSelectedId);
+const board = project.boards.find(
+  (b) => b.id === activeSelectedId && !b.hiddenInProject
+);
   const updateBoard = useProjectStore((s) => s.updateBoard);
 const updateBoardAnchor = useProjectStore((s) => s.updateBoardAnchor);
   const updateBoardDimensions = useProjectStore((s) => s.updateBoardDimensions);
@@ -158,9 +160,12 @@ const updateBoardAnchor = useProjectStore((s) => s.updateBoardAnchor);
   const applyRotationEditor = useProjectStore((s) => s.applyRotationEditor);
   const copyBoard = useProjectStore((s) => s.copyBoard);
   const removeBoard = useProjectStore((s) => s.removeBoard);
-
   
   const [anchorInputs, setAnchorInputs] = useState({ x: '0', y: '0', z: '0' });
+const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
+const [cabinetName, setCabinetName] = useState('');
+
+
 
 useEffect(() => {
   if (!board) return;
@@ -189,7 +194,16 @@ useEffect(() => {
 
   if (!board) return <aside className="left-panel empty">Wybierz formatkę albo dodaj nową.</aside>;
 
-  const projectMaterialFamily = board.role === 'KORPUS' ? 'korpus' : board.role === 'FRONT' ? 'front' : 'blat';
+  const projectMaterialFamily =
+  board.role === 'KORPUS'
+    ? 'korpus'
+    : board.role === 'FRONT'
+    ? 'front'
+    : board.role === 'BLAT'
+    ? 'blat'
+    : board.role === 'HDF'
+    ? 'hdf'
+    : 'inne';
 
   const renderDimensionFields = () => {
     const dims: any = board.dimensions;
@@ -331,6 +345,35 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         <label><input type="radio" checked={board.role === 'KORPUS'} onChange={() => updateBoard(board.id, { role: 'KORPUS', material: { ...board.material, role: 'KORPUS', materialIndex: 1 } })} /> Korpus</label>
         <label><input type="radio" checked={board.role === 'FRONT'} onChange={() => updateBoard(board.id, { role: 'FRONT', material: { ...board.material, role: 'FRONT', materialIndex: 1 } })} /> Front</label>
         <label><input type="radio" checked={board.role === 'BLAT'} onChange={() => updateBoard(board.id, { role: 'BLAT', material: { ...board.material, role: 'BLAT', materialIndex: 1 } })} /> Blat</label>
+
+<label>
+  <input
+    type="radio"
+    checked={board.role === 'HDF'}
+    onChange={() =>
+      updateBoard(board.id, {
+        role: 'HDF',
+        material: { ...board.material, role: 'HDF', materialIndex: 1 }
+      })
+    }
+  />
+  HDF
+</label>
+
+<label>
+  <input
+    type="radio"
+    checked={board.role === 'INNE'}
+    onChange={() =>
+      updateBoard(board.id, {
+        role: 'INNE',
+        material: { ...board.material, role: 'INNE', materialIndex: 1 }
+      })
+    }
+  />
+  Inne
+</label>
+
       </div>
 
       <div className="material-row">
@@ -394,8 +437,50 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         </div>
       )}
 
-      <button className="copy-btn" onClick={() => copyBoard(board.id)}>Kopiuj</button>
-      <button className="delete-btn" onClick={() => removeBoard(board.id)}>Usuń</button>
+<button className="copy-btn" onClick={() => copyBoard(board.id)}>Kopiuj</button>
+<button className="delete-btn" onClick={() => removeBoard(board.id)}>Usuń</button>
+
+<button
+  className="create-cabinet-btn"
+  onClick={() => {
+    setCabinetName(board.cabinetName ?? '');
+    setCabinetModalOpen(true);
+  }}
+>
+  Twórz szafkę
+</button>
+{cabinetModalOpen && (
+  <div className="rotation-editor">
+    <span>Nazwa szafki</span>
+
+    <input
+      type="text"
+      value={cabinetName}
+      onChange={(e) => setCabinetName(e.target.value)}
+      placeholder="np. Szafka 1"
+    />
+
+    <button className="secondary" onClick={() => setCabinetModalOpen(false)}>
+      Anuluj
+    </button>
+
+    <button
+      onClick={() => {
+        const name = cabinetName.trim();
+
+        if (!name) {
+          alert('Wpisz nazwę szafki');
+          return;
+        }
+
+        updateBoard(board.id, { cabinetName: name });
+        setCabinetModalOpen(false);
+      }}
+    >
+      Zapisz
+    </button>
+  </div>
+)}
     </aside>
   );
 }

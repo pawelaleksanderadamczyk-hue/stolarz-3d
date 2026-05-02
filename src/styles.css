@@ -161,6 +161,7 @@ label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
   display: grid;
   place-items: center;
 }
+
 .modal-card {
   width: min(560px, 92vw);
   background: white;
@@ -524,13 +525,14 @@ button.active {
 }
 
 .color-select-current {
-  width: 100%;
-  min-height: 36px;
-  border: 1px solid #9fb8c8;
-  border-radius: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  text-align: center;
+  height: 20px;
+  min-height: 20px;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .color-select-list {
@@ -548,15 +550,161 @@ button.active {
 }
 
 .color-select-option {
-  width: 100%;
-  min-height: 34px;
-  border: 0;
-  display: block;
-  font-weight: 800;
-  cursor: pointer;
-  text-align: center;
+  height: 20px;
+  min-height: 20px;
+  padding: 2px 6px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .color-select-option:hover {
   filter: brightness(0.9);
+}
+
+
+.create-cabinet-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: #dc2626;
+  color: white;
+  border-color: #991b1b;
+}
+
+.create-cabinet-btn:hover {
+  background: #b91c1c;
+}
+
+
+.cabinet-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 4px 0;
+}
+
+
+.cabinet-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.cabinet-name-field input {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+}
+
+.modal-card input {
+  display: block !important;
+  width: 100% !important;
+  height: 36px !important;
+  background: white !important;
+  color: black !important;
+  border: 1px solid #ccc !important;
+}
+
+
+.project-materials {
+  display: grid;
+  grid-template-columns: repeat(6,  1fr);
+  gap: 4px;
+}
+
+.material-family {
+  min-width: 240px;
+  padding: 10px;
+}
+
+.material-family strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.material-family label {
+  display: grid;
+  grid-template-columns: 80px 1fr; /* 👈 więcej miejsca */
+  align-items: center;
+  gap: 8px;
+  margin: 0px 0;
+  font-size: 12px;
+}
+
+.color-select-list {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr); /* 👈 1 kolumna */
+  gap: 1px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.color-select-option {
+  min-height: 22px;
+  height: 22px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+
+
+
+
+
+.color-select-current {
+  width: 100%;
+  height: 24px;
+  min-height: 24px;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+
+
+.cabinet-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.cabinet-table th,
+.cabinet-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.cabinet-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.cabinet-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.cabinet-modal {
+  background: #eef2ff; /* jasne tło jak reszta UI */
+  color: #2f5eff;
+}
+
+.cabinet-modal h2 {
+  color: #2f5eff;
+}
+
+.cabinet-modal .cabinet-table th {
+  background: #2f5eff;
+  color: white;
+}
+
+.cabinet-modal .cabinet-table td {
+  background: white;
+  color: #1f2937;
+}
+
+.cabinet-modal {
+  border: 1px solid #c7d2fe;
 }

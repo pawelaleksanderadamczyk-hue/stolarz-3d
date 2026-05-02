@@ -65,6 +65,7 @@ export function createBoard(project: ProjectData, form: NewBoardForm): BoardItem
     id: createId(),
     number,
     name: '',
+cabinetName: '',
     shape: form.shape,
     role: form.role,
     material: {

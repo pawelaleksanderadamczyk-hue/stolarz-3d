@@ -1,5 +1,5 @@
 export type ShapeType = 'RECT' | 'RECT_CUT_CORNER' | 'RECT_CORNER_NOTCH' | 'RECT_INNER_CUTOUT';
-export type PartRole = 'KORPUS' | 'FRONT' | 'BLAT';
+export type PartRole = 'KORPUS' | 'FRONT' | 'BLAT' | 'HDF' | 'INNE';
 export type PlaneType = 'ZX' | 'XZ' | 'XY' | 'YX' | 'YZ' | 'ZY';
 export type MaterialColor = 'biały' | 'niebieski' | 'żółty' | 'czerwony';
 export type MaterialIndex = 1 | 2 | 3;
@@ -41,6 +41,8 @@ export interface BoardItem {
   id: string;
   number: string;
   name?: string;
+  cabinetName?: string;
+hiddenInProject?: boolean;
   shape: ShapeType;
   role: PartRole;
   material: MaterialAssignment;

@@ -18,6 +18,10 @@ export function TopToolbar() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
+
+const [cabinetsOpen, setCabinetsOpen] = useState(false);
+const [selectedCabinet, setSelectedCabinet] = useState<string | null>(null);
+
   const {
     project,
     saveProjectToFile,
@@ -31,6 +35,11 @@ export function TopToolbar() {
     setViewMode,
     viewMode
   } = useProjectStore();
+
+const cabinetNames = Array.from(
+  new Set(project.boards.map((b) => b.cabinetName).filter((n) => n && n.trim()))
+);
+
   const loadProjectFromFile = useProjectStore((s) => s.loadProjectFromFile);
 
   return (
@@ -57,6 +66,7 @@ export function TopToolbar() {
           <button onClick={() => setMaterialsOpen((prev) => !prev)}>Materiał</button>
           <button onClick={openAddBoardModal}>Dodaj formatkę</button>
           <button onClick={() => setAnchorOpen((prev) => !prev)}>Narożnik dodawanych</button>
+<button onClick={() => setCabinetsOpen((prev) => !prev)}>Szafki</button>
           <button onClick={resetView}>Reset widoku</button>
           <button onClick={undo}>Cofnij</button>
           <button onClick={redo}>Ponów</button>
@@ -69,6 +79,33 @@ export function TopToolbar() {
         </div>
       </div>
 
+
+{cabinetsOpen && (
+  <div className="toolbar-panel">
+    <div className="materials-popover-header">
+      <strong>Szafki</strong>
+      <button className="secondary" onClick={() => setCabinetsOpen(false)}>
+        Zamknij
+      </button>
+    </div>
+    {cabinetNames.length === 0 && <p>Brak szafek</p>}
+    {cabinetNames.map((name) => (
+      <button
+        key={name}
+        className="cabinet-item"
+        onClick={() => {
+          setSelectedCabinet(name);
+        }}
+      >
+        {name}
+      </button>
+    ))}
+  </div>
+)}
+
+
+
+
       {materialsOpen && (
         <div className="toolbar-panel toolbar-panel-wide">
           <div className="materials-popover-header">
@@ -78,11 +115,13 @@ export function TopToolbar() {
 
           <div className="project-materials">
             {([
-              { family: 'korpus', label: 'KORPUS' },
-              { family: 'front', label: 'FRONT' },
-              { family: 'blat', label: 'BLAT' },
-              { family: 'okleina', label: 'OKLEINA' }
-            ] as const).map(({ family, label }) => (
+  { family: 'korpus', label: 'KORPUS' },
+  { family: 'front', label: 'FRONT' },
+  { family: 'blat', label: 'BLAT' },
+  { family: 'hdf', label: 'HDF' },
+  { family: 'inne', label: 'INNE' },
+  { family: 'okleina', label: 'OKLEINA' }
+] as const).map(({ family, label }) => (
               <div key={family} className="material-family">
                 <strong>{label}</strong>
                 {[1, 2, 3].map((index) => (
@@ -120,6 +159,75 @@ export function TopToolbar() {
           </div>
         </div>
       )}
+
+
+{selectedCabinet && (
+  <div className="modal-backdrop">
+<div className="modal-card cabinet-modal">
+      <h2>{selectedCabinet}</h2>
+     <table className="cabinet-table">
+  <thead>
+    <tr>
+      <th>Nr</th>
+      <th>Długość</th>
+      <th>Szerokość</th>
+      <th>Grubość</th>
+      <th>X</th>
+      <th>Y</th>
+      <th>Z</th>
+    </tr>
+  </thead>
+  <tbody>
+    {project.boards
+      .filter((b) => b.cabinetName === selectedCabinet)
+      .map((b) => {
+        const d: any = b.dimensions;
+        return (
+          <tr key={b.id}>
+            <td>{b.number}</td>
+            <td>{d.length ?? d.length1}</td>
+            <td>{d.width ?? d.width1}</td>
+            <td>{d.thickness}</td>
+            <td>{b.anchor.x}</td>
+            <td>{b.anchor.y}</td>
+            <td>{b.anchor.z}</td>
+          </tr>
+        );
+      })}
+  </tbody>
+</table>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+  <button
+    onClick={() => {
+      // zapis szafki (na razie tylko oznaczamy jako ukrytą)
+      const state = useProjectStore.getState();
+      const updatedBoards = state.project.boards.map((b) =>
+        b.cabinetName === selectedCabinet
+          ? { ...b, hiddenInProject: true }
+          : b
+      );
+      useProjectStore.setState({
+        project: {
+          ...state.project,
+          boards: updatedBoards
+        }
+      });
+    }}
+  >
+    Zapisz szafkę
+  </button>
+  <button className="secondary" onClick={() => setSelectedCabinet(null)}>
+    Zamknij
+  </button>
+</div>
+    </div>
+  </div>
+)}
+
+
+
+
     </div>
   );
 }

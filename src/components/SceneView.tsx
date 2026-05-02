@@ -423,7 +423,9 @@ export function SceneView() {
         <ambientLight intensity={1.15} />
         <directionalLight position={[700, 1200, 700]} intensity={1.2} />
         <AxisHelper />
-        {boards.map((board) => (
+        {boards
+  .filter((board) => !board.hiddenInProject)
+  .map((board) => (
           <BoardMesh
             key={board.id}
             board={board}
