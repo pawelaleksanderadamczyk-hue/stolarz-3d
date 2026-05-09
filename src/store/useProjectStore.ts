@@ -488,12 +488,22 @@ renumberBoards(project);
   setViewMode: (mode) => set({ viewMode: mode }),
   resetView: () => set((state) => ({ viewMode: 'IZOMETRIA', viewResetNonce: state.viewResetNonce + 1 })),
 
-  setProjectMaterial: (family, index, color) => {
-    const state = get();
-    const project = cloneProject(state.project);
-    project.materials[family][index] = color;
-    set({ history: pushHistory(state), future: [], project });
-  },
+setProjectMaterial: (family, index, color) => {
+  const state = get();
+  const project = cloneProject(state.project);
+  project.materials = {
+    ...project.materials,
+    [family]: {
+      ...(project.materials as any)[family],
+      [index]: color
+    }
+  } as any;
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
 
   saveProjectToFile: () => {
     downloadFile('projekt-stolarz3d.json', JSON.stringify(get().project, null, 2), 'application/json');

@@ -81,8 +81,11 @@ export function boardsToCsv(boards: BoardItem[], materials: ProjectMaterialPalet
 
   const rows = boards.map((board, index) => {
     const family = getFamily(board.role);
-    const materialColor = materials[family][board.material.materialIndex];
-    const edgingColor = materials.okleina[board.material.edgingIndex];
+    const materialColor =
+  materials?.[family]?.[board.material.materialIndex] ?? 'biały';
+const edgingColor =
+  materials?.okleina?.[board.material.edgingIndex] ?? 'biały';
+
     return [
       index + 1,
       board.number,

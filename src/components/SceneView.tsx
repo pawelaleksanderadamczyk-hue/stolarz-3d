@@ -207,7 +207,11 @@ function getFinalQuaternion(planeQuaternion: THREE.Quaternion, board: BoardItem)
 
 function EdgeStrips({ board }: { board: BoardItem }) {
   const materials = useProjectStore((s) => s.project.materials);
-  const edgingColor = COLOR_TO_HEX[materials.okleina[board.material.edgingIndex]];
+  const edgingName =
+  materials?.okleina?.[board.material.edgingIndex] ?? 'biały';
+const edgingColor =
+  COLOR_TO_HEX[edgingName] ?? '#ffffff';
+
   const thickness = Number((board.dimensions as any).thickness ?? 18);
   const bandDepth = 0.4;
   const bandHeight = Math.max(1, thickness);
@@ -283,7 +287,13 @@ function BoardMesh({ board, selected }: { board: BoardItem; selected: boolean })
   const selectBoard = useProjectStore((s) => s.selectBoard);
   const materials = useProjectStore((s) => s.project.materials);
   const family = board.role === 'KORPUS' ? 'korpus' : board.role === 'FRONT' ? 'front' : 'blat';
-  const color = selected ? '#f5a623' : COLOR_TO_HEX[materials[family][board.material.materialIndex]];
+  const materialPalette = materials?.[family] ?? {};
+const materialColor =
+  materialPalette?.[board.material.materialIndex] ?? 'biały';
+const color = selected
+  ? '#f5a623'
+  : COLOR_TO_HEX[materialColor] ?? '#d8b16a';
+
   const geometry = useMemo(() => createBoardGeometry(board), [board]);
   const planeQuaternion = useMemo(() => getPlaneQuaternion(board), [board.plane]);
   const finalQuaternion = useMemo(

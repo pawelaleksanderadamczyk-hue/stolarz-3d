@@ -97,8 +97,8 @@ export function TopToolbar() {
                   <label key={`${family}-${index}`}>
                     {label} {index}
                     <ColorSelect
-  value={project.materials[family][index as MaterialIndex]}
-  onChange={(color) => setProjectMaterial(family, index as MaterialIndex, color)}
+  value={(project.materials as any)?.[family]?.[index as MaterialIndex] ?? 'biały'}
+  onChange={(color) => setProjectMaterial(family as any, index as MaterialIndex, color)}
 />
                   </label>
                 ))}
