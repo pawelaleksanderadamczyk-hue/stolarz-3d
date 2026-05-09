@@ -10,13 +10,43 @@ function getThickness(board: BoardItem) {
 }
 
 function getLength(board: BoardItem) {
-  if ('length' in board.dimensions) return Number((board.dimensions as any).length);
-  return Number((board.dimensions as any).length1 ?? 0);
+  const d: any = board.dimensions;
+  switch (board.shape) {
+    case 'RECT':
+    case 'RECT_INNER_CUTOUT':
+      return Number(d.length ?? 0);
+    case 'RECT_CUT_CORNER':
+    case 'RECT_CORNER_NOTCH':
+      return Number(d.length1 ?? 0);
+    case 'RIGHT_TRAPEZOID':
+      return Number(Math.max(d.lengthLeft ?? 0, d.lengthRight ?? 0));
+    case 'TRAPEZOID':
+    case 'TRAPEZOID_INNER_CUTOUT':
+      return Number(d.height ?? 0);
+    default:
+      return 0;
+  }
 }
 
+
+
 function getWidth(board: BoardItem) {
-  if ('width' in board.dimensions) return Number((board.dimensions as any).width);
-  return Number((board.dimensions as any).width1 ?? 0);
+  const d: any = board.dimensions;
+  switch (board.shape) {
+    case 'RECT':
+    case 'RECT_INNER_CUTOUT':
+      return Number(d.width ?? 0);
+    case 'RECT_CUT_CORNER':
+    case 'RECT_CORNER_NOTCH':
+      return Number(d.width1 ?? 0);
+    case 'RIGHT_TRAPEZOID':
+      return Number(d.width ?? 0);
+    case 'TRAPEZOID':
+    case 'TRAPEZOID_INNER_CUTOUT':
+      return Number(d.width ?? 0);
+    default:
+      return 0;
+  }
 }
 
 function countLengthEdging(board: BoardItem) {
@@ -27,9 +57,11 @@ function countWidthEdging(board: BoardItem) {
   return Number(Boolean(board.edging.widthTop)) + Number(Boolean(board.edging.widthBottom));
 }
 
-function getFamily(role: BoardItem['role']): 'korpus' | 'front' | 'blat' {
+function getFamily(role: BoardItem['role']): 'korpus' | 'front' | 'blat' | 'hdf' | 'inne' {
   if (role === 'FRONT') return 'front';
   if (role === 'BLAT') return 'blat';
+  if (role === 'HDF') return 'hdf';
+  if (role === 'INNE') return 'inne';
   return 'korpus';
 }
 

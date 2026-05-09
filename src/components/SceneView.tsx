@@ -149,10 +149,10 @@ case 'RIGHT_TRAPEZOID': {
   const d: any = board.dimensions;
 
   return [
-    { key: 'lengthLeft', start: [0, 0], end: [d.leftInset, d.height] },
-    { key: 'lengthRight', start: [d.width, 0], end: [d.width - d.rightInset, d.height] },
-    { key: 'widthBottom', start: [0, 0], end: [d.width, 0] },
-    { key: 'widthTop', start: [d.leftInset, d.height], end: [d.width - d.rightInset, d.height] }
+    { key: 'widthBottom', start: [0, 0], end: [0, d.width] },
+    { key: 'lengthLeft', start: [0, 0], end: [d.height, d.leftInset] },
+    { key: 'lengthRight', start: [0, d.width], end: [d.height, d.width - d.rightInset] },
+    { key: 'widthTop', start: [d.height, d.leftInset], end: [d.height, d.width - d.rightInset] }
   ];
 }
 
@@ -160,15 +160,15 @@ case 'TRAPEZOID_INNER_CUTOUT': {
   const d: any = board.dimensions;
 
   return [
-    { key: 'lengthLeft', start: [0, 0], end: [d.leftInset, d.height] },
-    { key: 'lengthRight', start: [d.width, 0], end: [d.width - d.rightInset, d.height] },
-    { key: 'widthBottom', start: [0, 0], end: [d.width, 0] },
-    { key: 'widthTop', start: [d.leftInset, d.height], end: [d.width - d.rightInset, d.height] },
+    { key: 'widthBottom', start: [0, 0], end: [0, d.width] },
+    { key: 'lengthLeft', start: [0, 0], end: [d.height, d.leftInset] },
+    { key: 'lengthRight', start: [0, d.width], end: [d.height, d.width - d.rightInset] },
+    { key: 'widthTop', start: [d.height, d.leftInset], end: [d.height, d.width - d.rightInset] },
 
-    { key: 'otwórDół', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength], hole: true },
-    { key: 'otwórGóra', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength + d.cutoutLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true },
-    { key: 'otwórLewo', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true },
-    { key: 'otwórPrawo', start: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true }
+    { key: 'otwórDół', start: [d.cutoutOffsetLength, d.cutoutOffsetWidth], end: [d.cutoutOffsetLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true },
+    { key: 'otwórGóra', start: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth], end: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true },
+    { key: 'otwórLewo', start: [d.cutoutOffsetLength, d.cutoutOffsetWidth], end: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth], hole: true },
+    { key: 'otwórPrawo', start: [d.cutoutOffsetLength, d.cutoutOffsetWidth + d.cutoutWidth], end: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true }
   ];
 }
 

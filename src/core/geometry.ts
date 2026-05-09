@@ -79,9 +79,9 @@ function createTrapezoidShape(
 ) {
   const shape = new THREE.Shape();
   shape.moveTo(0, 0);
-  shape.lineTo(width, 0);
-  shape.lineTo(width - rightInset, height);
-  shape.lineTo(leftInset, height);
+  shape.lineTo(height, leftInset);
+  shape.lineTo(height, width - rightInset);
+  shape.lineTo(0, width);
   shape.lineTo(0, 0);
   return shape;
 }
@@ -103,11 +103,11 @@ function createTrapezoidInnerCutoutShape(
     rightInset
   );
   const hole = new THREE.Path();
-  hole.moveTo(cutoutOffsetWidth, cutoutOffsetLength);
-  hole.lineTo(cutoutOffsetWidth + cutoutWidth, cutoutOffsetLength);
-  hole.lineTo(cutoutOffsetWidth + cutoutWidth, cutoutOffsetLength + cutoutLength);
-  hole.lineTo(cutoutOffsetWidth, cutoutOffsetLength + cutoutLength);
-  hole.lineTo(cutoutOffsetWidth, cutoutOffsetLength);
+  hole.moveTo(cutoutOffsetLength, cutoutOffsetWidth);
+hole.lineTo(cutoutOffsetLength + cutoutLength, cutoutOffsetWidth);
+hole.lineTo(cutoutOffsetLength + cutoutLength, cutoutOffsetWidth + cutoutWidth);
+hole.lineTo(cutoutOffsetLength, cutoutOffsetWidth + cutoutWidth);
+hole.lineTo(cutoutOffsetLength, cutoutOffsetWidth);
   shape.holes.push(hole);
   return shape;
 }

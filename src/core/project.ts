@@ -67,22 +67,22 @@ case 'RIGHT_TRAPEZOID':
   };
 case 'TRAPEZOID':
   return {
-    height: 400,
-    width: 800,
-    leftInset: 120,
-    rightInset: 120,
+    height: 800,
+    width: 400,
+    leftInset: 100,
+    rightInset: 100,
     thickness: 18
   };
 case 'TRAPEZOID_INNER_CUTOUT':
   return {
-    height: 400,
-    width: 800,
-    leftInset: 120,
-    rightInset: 120,
-    cutoutOffsetLength: 120,
-    cutoutOffsetWidth: 300,
-    cutoutLength: 120,
-    cutoutWidth: 160,
+    height: 800,
+    width: 400,
+    leftInset: 100,
+    rightInset: 100,
+    cutoutOffsetLength: 200,
+    cutoutOffsetWidth: 100,
+    cutoutLength: 100,
+    cutoutWidth: 100,
     thickness: 18
   };
   }
@@ -176,23 +176,21 @@ case 'RIGHT_TRAPEZOID': {
 
 case 'TRAPEZOID': {
   const d: any = board.dimensions;
-
   return [
     { x: 0, y: 0 },
-    { x: d.width, y: 0 },
-    { x: d.width - d.rightInset, y: d.height },
-    { x: d.leftInset, y: d.height }
+    { x: d.height, y: d.leftInset },
+    { x: d.height, y: d.width - d.rightInset },
+    { x: 0, y: d.width }
   ];
 }
 
 case 'TRAPEZOID_INNER_CUTOUT': {
   const d: any = board.dimensions;
-
   return [
     { x: 0, y: 0 },
-    { x: d.width, y: 0 },
-    { x: d.width - d.rightInset, y: d.height },
-    { x: d.leftInset, y: d.height }
+    { x: d.height, y: d.leftInset },
+    { x: d.height, y: d.width - d.rightInset },
+    { x: 0, y: d.width }
   ];
 }
 
