@@ -162,8 +162,6 @@ const updateBoardAnchor = useProjectStore((s) => s.updateBoardAnchor);
   const removeBoard = useProjectStore((s) => s.removeBoard);
   
   const [anchorInputs, setAnchorInputs] = useState({ x: '0', y: '0', z: '0' });
-const [cabinetModalOpen, setCabinetModalOpen] = useState(false);
-const [cabinetName, setCabinetName] = useState('');
 
 
 
@@ -440,47 +438,8 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
 <button className="copy-btn" onClick={() => copyBoard(board.id)}>Kopiuj</button>
 <button className="delete-btn" onClick={() => removeBoard(board.id)}>Usuń</button>
 
-<button
-  className="create-cabinet-btn"
-  onClick={() => {
-    setCabinetName(board.cabinetName ?? '');
-    setCabinetModalOpen(true);
-  }}
->
-  Twórz szafkę
-</button>
-{cabinetModalOpen && (
-  <div className="rotation-editor">
-    <span>Nazwa szafki</span>
 
-    <input
-      type="text"
-      value={cabinetName}
-      onChange={(e) => setCabinetName(e.target.value)}
-      placeholder="np. Szafka 1"
-    />
 
-    <button className="secondary" onClick={() => setCabinetModalOpen(false)}>
-      Anuluj
-    </button>
-
-    <button
-      onClick={() => {
-        const name = cabinetName.trim();
-
-        if (!name) {
-          alert('Wpisz nazwę szafki');
-          return;
-        }
-
-        updateBoard(board.id, { cabinetName: name });
-        setCabinetModalOpen(false);
-      }}
-    >
-      Zapisz
-    </button>
-  </div>
-)}
     </aside>
   );
 }
