@@ -66,7 +66,7 @@ export const COLOR_TO_HEX: Record<string, string> = {
   'beżowy': '#e5c29f'
 };
 
-export const DEFAULT_PROJECT_MATERIALS = {
+export const DEFAULT_PROJECT_MATERIALS: ProjectMaterialPalette = {
   korpus: { 1: 'biały', 2: 'niebieski', 3: 'żółty' },
   front: { 1: 'biały', 2: 'niebieski', 3: 'żółty' },
   blat: { 1: 'biały', 2: 'niebieski', 3: 'żółty' },

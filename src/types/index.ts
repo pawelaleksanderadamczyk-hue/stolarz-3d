@@ -26,6 +26,8 @@ export interface ProjectMaterialPalette {
   front: Record<MaterialIndex, MaterialColor>;
   blat: Record<MaterialIndex, MaterialColor>;
   okleina: Record<MaterialIndex, MaterialColor>;
+  hdf: Record<MaterialIndex, MaterialColor>;
+  inne: Record<MaterialIndex, MaterialColor>;
 }
 
 export interface RectDims { length: number; width: number; thickness: number; }

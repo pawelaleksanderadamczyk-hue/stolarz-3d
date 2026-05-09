@@ -86,6 +86,7 @@ function getPanelOuterPolygon2D(board: BoardItem): Array<{ x: number; y: number 
         { x: 0, y: d.width }
       ];
   }
+return [];
 }
 
 function getPanelLeadingCorner(board: BoardItem): Vec3 {
