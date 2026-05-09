@@ -29,7 +29,10 @@ export function createEmptyProject(): ProjectData {
       RECT: 1,
       RECT_CUT_CORNER: 1,
       RECT_CORNER_NOTCH: 1,
-      RECT_INNER_CUTOUT: 1
+      RECT_INNER_CUTOUT: 1,
+	RIGHT_TRAPEZOID: 1,
+	TRAPEZOID: 1,
+	TRAPEZOID_INNER_CUTOUT: 1
     },
     globalAnchor: { x: 0, y: 0, z: 0 },
     materials: DEFAULT_PROJECT_MATERIALS,
@@ -55,6 +58,33 @@ export function createDefaultDimensions(shape: ShapeType): ShapeDimensions {
         cutoutWidth: 100,
         thickness: 18
       };
+case 'RIGHT_TRAPEZOID':
+  return {
+    lengthLeft: 800,
+    lengthRight: 650,
+    width: 400,
+    thickness: 18
+  };
+case 'TRAPEZOID':
+  return {
+    height: 400,
+    width: 800,
+    leftInset: 120,
+    rightInset: 120,
+    thickness: 18
+  };
+case 'TRAPEZOID_INNER_CUTOUT':
+  return {
+    height: 400,
+    width: 800,
+    leftInset: 120,
+    rightInset: 120,
+    cutoutOffsetLength: 120,
+    cutoutOffsetWidth: 300,
+    cutoutLength: 120,
+    cutoutWidth: 160,
+    thickness: 18
+  };
   }
 }
 
@@ -133,6 +163,42 @@ export function getOuterPolygon2D(board: BoardItem): Array<{ x: number; y: numbe
         { x: d.length, y: d.width },
         { x: 0, y: d.width }
       ];
+
+case 'RIGHT_TRAPEZOID': {
+  const d: any = board.dimensions;
+  return [
+    { x: 0, y: 0 },
+    { x: 0, y: d.width },
+    { x: d.lengthRight, y: d.width },
+    { x: d.lengthLeft, y: 0 }
+  ];
+}
+
+case 'TRAPEZOID': {
+  const d: any = board.dimensions;
+
+  return [
+    { x: 0, y: 0 },
+    { x: d.width, y: 0 },
+    { x: d.width - d.rightInset, y: d.height },
+    { x: d.leftInset, y: d.height }
+  ];
+}
+
+case 'TRAPEZOID_INNER_CUTOUT': {
+  const d: any = board.dimensions;
+
+  return [
+    { x: 0, y: 0 },
+    { x: d.width, y: 0 },
+    { x: d.width - d.rightInset, y: d.height },
+    { x: d.leftInset, y: d.height }
+  ];
+}
+
+
+
+
   }
 }
 

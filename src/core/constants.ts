@@ -80,12 +80,18 @@ export const SHAPE_LABELS: Record<ShapeType, string> = {
   RECT: 'Prostokąt',
   RECT_CUT_CORNER: 'Prostokąt ze ściętym rogiem',
   RECT_CORNER_NOTCH: 'Prostokąt z wyciętym prostokątem w narożu',
-  RECT_INNER_CUTOUT: 'Prostokąt z wyciętym prostokątem wewnątrz'
+  RECT_INNER_CUTOUT: 'Prostokąt z wyciętym prostokątem wewnątrz',
+  RIGHT_TRAPEZOID: 'Trapez prostokątny',
+  TRAPEZOID: 'Trapez klasyczny',
+  TRAPEZOID_INNER_CUTOUT: 'Trapez z wyciętym prostokątem wewnątrz'
 };
 
 export const SHAPE_CODES: Record<ShapeType, string> = {
   RECT: 'PR',
   RECT_CUT_CORNER: 'PR/S',
   RECT_CORNER_NOTCH: 'PR/WPR',
-  RECT_INNER_CUTOUT: 'PR/OPR'
+  RECT_INNER_CUTOUT: 'PR/OPR',
+  RIGHT_TRAPEZOID: 'TP',
+  TRAPEZOID: 'TR',
+  TRAPEZOID_INNER_CUTOUT: 'TR/OPR'
 };

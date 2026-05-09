@@ -133,6 +133,47 @@ function getSegments(board: BoardItem): Segment[] {
         { key: 'otwórLewo', start: [d.cutoutOffsetLength, d.cutoutOffsetWidth], end: [d.cutoutOffsetLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true },
         { key: 'otwórPrawo', start: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth], end: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true }
       ];
+
+
+case 'RIGHT_TRAPEZOID': {
+  const d: any = board.dimensions;
+  return [
+    { key: 'widthBottom', start: [0, 0], end: [0, d.width] },
+    { key: 'lengthRight', start: [0, d.width], end: [d.lengthRight, d.width] },
+    { key: 'widthTop', start: [d.lengthRight, d.width], end: [d.lengthLeft, 0] },
+    { key: 'lengthLeft', start: [d.lengthLeft, 0], end: [0, 0] }
+  ];
+}
+
+    case 'TRAPEZOID': {
+  const d: any = board.dimensions;
+
+  return [
+    { key: 'lengthLeft', start: [0, 0], end: [d.leftInset, d.height] },
+    { key: 'lengthRight', start: [d.width, 0], end: [d.width - d.rightInset, d.height] },
+    { key: 'widthBottom', start: [0, 0], end: [d.width, 0] },
+    { key: 'widthTop', start: [d.leftInset, d.height], end: [d.width - d.rightInset, d.height] }
+  ];
+}
+
+case 'TRAPEZOID_INNER_CUTOUT': {
+  const d: any = board.dimensions;
+
+  return [
+    { key: 'lengthLeft', start: [0, 0], end: [d.leftInset, d.height] },
+    { key: 'lengthRight', start: [d.width, 0], end: [d.width - d.rightInset, d.height] },
+    { key: 'widthBottom', start: [0, 0], end: [d.width, 0] },
+    { key: 'widthTop', start: [d.leftInset, d.height], end: [d.width - d.rightInset, d.height] },
+
+    { key: 'otwórDół', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength], hole: true },
+    { key: 'otwórGóra', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength + d.cutoutLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true },
+    { key: 'otwórLewo', start: [d.cutoutOffsetWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true },
+    { key: 'otwórPrawo', start: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength], end: [d.cutoutOffsetWidth + d.cutoutWidth, d.cutoutOffsetLength + d.cutoutLength], hole: true }
+  ];
+}
+
+
+
   }
 }
 
@@ -198,16 +239,17 @@ function EdgeStrips({ board }: { board: BoardItem }) {
         let nx = dy / len;
         let ny = -dx / len;
 
-        if (isLengthEdge) {
-          // Wysokości: odsunięcie po szerokości
-          if (seg.key === 'lengthRight') { nx = 0; ny = 1; }
-          if (seg.key === 'lengthLeft') { nx = 0; ny = -1; }
-        }
-        if (isWidthEdge) {
-          // Szerokości: odsunięcie po wysokości
-          if (seg.key === 'widthTop') { nx = 1; ny = 0; }
-          if (seg.key === 'widthBottom') { nx = -1; ny = 0; }
-        }
+        if (board.shape !== 'RIGHT_TRAPEZOID' && board.shape !== 'TRAPEZOID' && board.shape !== 'TRAPEZOID_INNER_CUTOUT') {
+  if (isLengthEdge) {
+    if (seg.key === 'lengthRight') { nx = 0; ny = 1; }
+    if (seg.key === 'lengthLeft') { nx = 0; ny = -1; }
+  }
+
+  if (isWidthEdge) {
+    if (seg.key === 'widthTop') { nx = 1; ny = 0; }
+    if (seg.key === 'widthBottom') { nx = -1; ny = 0; }
+  }
+}
 
         if (seg.key === 'notchVertical') { nx = 0; ny = -1; }
         if (seg.key === 'notchHorizontal') { nx = -1; ny = 0; }
@@ -218,8 +260,13 @@ function EdgeStrips({ board }: { board: BoardItem }) {
         if (seg.key === 'otwórPrawo') { nx = -1; ny = 0; }
 
         const dir = seg.hole ? -1 : 1;
-        const ox = nx * dir * (bandDepth / 2 + 0.2);
-        const oy = ny * dir * (bandDepth / 2 + 0.2);
+        const isTrapezoid =
+  board.shape === 'RIGHT_TRAPEZOID' ||
+  board.shape === 'TRAPEZOID' ||
+  board.shape === 'TRAPEZOID_INNER_CUTOUT';
+
+const ox = isTrapezoid ? 0 : nx * dir * (bandDepth / 2 + 0.2);
+const oy = isTrapezoid ? 0 : ny * dir * (bandDepth / 2 + 0.2);
 
         return (
           <mesh key={seg.key} position={[mx + ox, my + oy, bandHeight / 2]} rotation={[0, 0, angle]} renderOrder={2}>

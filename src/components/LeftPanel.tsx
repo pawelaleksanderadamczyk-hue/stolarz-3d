@@ -242,6 +242,65 @@ useEffect(() => {
       );
     }
 
+
+if (board.shape === 'RIGHT_TRAPEZOID') {
+  return (
+    <>
+      {row('dimension-row dimension-row-3', <>
+        {field('Wysokość 1', 'lengthLeft')}
+        {field('Wysokość 2', 'lengthRight')}
+        {field('Grubość', 'thickness')}
+      </>)}
+      {row('dimension-row dimension-row-1', <>
+        {field('Szerokość', 'width')}
+      </>)}
+    </>
+  );
+}
+
+if (board.shape === 'TRAPEZOID') {
+  return (
+    <>
+      {row('dimension-row dimension-row-3', <>
+        {field('Wysokość', 'height')}
+        {field('Szerokość', 'width')}
+        {field('Grubość', 'thickness')}
+      </>)}
+      {row('dimension-row dimension-row-2', <>
+        {field('Wcięcie lewe', 'leftInset')}
+        {field('Wcięcie prawe', 'rightInset')}
+      </>)}
+    </>
+  );
+}
+
+if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
+  return (
+    <>
+      {row('dimension-row dimension-row-3', <>
+        {field('Wysokość', 'height')}
+        {field('Szerokość', 'width')}
+        {field('Grubość', 'thickness')}
+      </>)}
+      {row('dimension-row dimension-row-2', <>
+        {field('Wcięcie lewe', 'leftInset')}
+        {field('Wcięcie prawe', 'rightInset')}
+      </>)}
+      {row('dimension-row dimension-row-2', <>
+        {field('Położenie wysokości', 'cutoutOffsetLength')}
+        {field('Położenie szerokości', 'cutoutOffsetWidth')}
+      </>)}
+      {row('dimension-row dimension-row-2', <>
+        {field('Wysokość otworu', 'cutoutLength')}
+        {field('Szerokość otworu', 'cutoutWidth')}
+      </>)}
+    </>
+  );
+}
+
+
+
+
     return (
       <>
         {row('dimension-row dimension-row-3', <>
@@ -306,6 +365,34 @@ useEffect(() => {
       );
     }
 
+if (board.shape === 'RIGHT_TRAPEZOID') {
+  return [
+    { key: 'lengthLeft', label: 'Bok lewy' },
+    { key: 'lengthRight', label: 'Bok prawy' },
+    { key: 'widthBottom', label: 'Szerokość dół' },
+    { key: 'widthTop', label: 'Szerokość góra' }
+  ];
+}
+
+if (board.shape === 'TRAPEZOID' || board.shape === 'TRAPEZOID_INNER_CUTOUT') {
+  const trapezoidOptions = [
+    { key: 'lengthLeft', label: 'Bok lewy' },
+    { key: 'lengthRight', label: 'Bok prawy' },
+    { key: 'widthBottom', label: 'Szerokość dół' },
+    { key: 'widthTop', label: 'Szerokość góra' }
+  ];
+
+  if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
+    trapezoidOptions.push(
+      { key: 'otwórDół', label: 'Otwór dół' },
+      { key: 'otwórGóra', label: 'Otwór góra' },
+      { key: 'otwórLewo', label: 'Otwór lewo' },
+      { key: 'otwórPrawo', label: 'Otwór prawo' }
+    );
+  }
+
+  return trapezoidOptions;
+}
     return options;
   };
 

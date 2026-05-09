@@ -1,4 +1,11 @@
-export type ShapeType = 'RECT' | 'RECT_CUT_CORNER' | 'RECT_CORNER_NOTCH' | 'RECT_INNER_CUTOUT';
+export type ShapeType =
+  | 'RECT'
+  | 'RECT_CUT_CORNER'
+  | 'RECT_CORNER_NOTCH'
+  | 'RECT_INNER_CUTOUT'
+  | 'RIGHT_TRAPEZOID'
+  | 'TRAPEZOID'
+  | 'TRAPEZOID_INNER_CUTOUT';
 export type PartRole = 'KORPUS' | 'FRONT' | 'BLAT' | 'HDF' | 'INNE';
 export type PlaneType = 'ZX' | 'XZ' | 'XY' | 'YX' | 'YZ' | 'ZY';
 export type MaterialColor = 'biały' | 'niebieski' | 'żółty' | 'czerwony';
@@ -33,8 +40,32 @@ export interface RectInnerCutoutDims {
   cutoutWidth: number;
   thickness: number;
 }
+export interface RightTrapezoidDims {
+  lengthLeft: number;
+  lengthRight: number;
+  width: number;
+  thickness: number;
+}
+export interface TrapezoidDims {
+  height: number;
+  width: number;
+  leftInset: number;
+  rightInset: number;
+  thickness: number;
+}
+export interface TrapezoidInnerCutoutDims {
+  height: number;
+  width: number;
+  leftInset: number;
+  rightInset: number;
+  cutoutOffsetLength: number;
+  cutoutOffsetWidth: number;
+  cutoutLength: number;
+  cutoutWidth: number;
+  thickness: number;
+}
 
-export type ShapeDimensions = RectDims | RectCutCornerDims | RectCornerNotchDims | RectInnerCutoutDims;
+export type ShapeDimensions = RectDims | RectCutCornerDims | RectCornerNotchDims | RectInnerCutoutDims| RightTrapezoidDims | TrapezoidDims | TrapezoidInnerCutoutDims;
 export type EdgeSelection = Record<string, boolean>;
 
 export interface BoardItem {
