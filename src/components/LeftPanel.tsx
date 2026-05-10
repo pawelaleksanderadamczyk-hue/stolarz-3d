@@ -478,6 +478,25 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         </label>
       </div>
 
+
+<label>
+  Kierunek słojów
+  <select
+    value={board.grainDirection ?? 'none'}
+    onChange={(e) =>
+      updateBoard(board.id, {
+        grainDirection: e.target.value
+      })
+    }
+  >
+    <option value="none">Brak słojów</option>
+    <option value="vertical">Pion</option>
+    <option value="horizontal">Poziom</option>
+  </select>
+</label>
+
+
+
       <h3>Wymiary</h3>
       <div className="field-grid">{renderDimensionFields()}</div>
 

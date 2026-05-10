@@ -86,6 +86,7 @@ hiddenInProject?: boolean;
   rotationQuaternion?: Quaternion4;
   edging: EdgeSelection;
 printSelected?: boolean;
+grainDirection?: 'none' | 'vertical' | 'horizontal';
 }
 
 export interface ProjectData {

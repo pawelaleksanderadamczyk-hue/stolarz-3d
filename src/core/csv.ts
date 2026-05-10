@@ -72,6 +72,7 @@ export function boardsToCsv(boards: BoardItem[], materials: ProjectMaterialPalet
     'Materiał formatki',
     'Kolor okleiny',
     'Nazwa',
+    'Słój',
     'Grubość',
     'Długość',
     'Ilość oklejonych boków długości',
@@ -92,11 +93,24 @@ const edgingColor =
       `${family.toUpperCase()} ${board.material.materialIndex} — ${materialColor}`,
       `OKLEINA ${board.material.edgingIndex} — ${edgingColor}`,
       board.name ?? '',
+board.grainDirection === 'vertical'
+  ? 'Pion'
+  : board.grainDirection === 'horizontal'
+  ? 'Poziom'
+  : 'Brak',
       getThickness(board),
-      getLength(board),
-      countLengthEdging(board),
-      getWidth(board),
-      countWidthEdging(board)
+      board.grainDirection === 'horizontal'
+  ? getWidth(board)
+  : getLength(board),
+board.grainDirection === 'horizontal'
+  ? countWidthEdging(board)
+  : countLengthEdging(board),
+board.grainDirection === 'horizontal'
+  ? getLength(board)
+  : getWidth(board),
+board.grainDirection === 'horizontal'
+  ? countLengthEdging(board)
+  : countWidthEdging(board)
     ];
   });
 
