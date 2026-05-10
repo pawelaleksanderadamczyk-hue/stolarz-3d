@@ -470,19 +470,70 @@ function drawGrainDirection(
 
   const spacing = 7;
 
-  // PION
-  if (board.grainDirection === 'vertical') {
-    for (let x = minX - 20; x <= maxX + 20; x += spacing) {
-      pdf.line(x, minY - 40, x, maxY + 40);
-    }
-  }
+  const hasCutout =
+  board.shape === 'RECT_INNER_CUTOUT' ||
+  board.shape === 'TRAPEZOID_INNER_CUTOUT';
 
-  // POZIOM
-  if (board.grainDirection === 'horizontal') {
-    for (let y = minY - 20; y <= maxY + 20; y += spacing) {
-      pdf.line(minX - 40, y, maxX + 40, y);
+let cutLeft = 0;
+let cutRight = 0;
+let cutTop = 0;
+let cutBottom = 0;
+
+if (hasCutout) {
+  const d: any = board.dimensions;
+
+  cutLeft =
+    startX + Number(d.cutoutOffsetWidth) * scale;
+
+  cutRight =
+    startX +
+    (Number(d.cutoutOffsetWidth) + Number(d.cutoutWidth)) *
+      scale;
+
+  cutBottom =
+    startY - Number(d.cutoutOffsetLength) * scale;
+
+  cutTop =
+    startY -
+    (Number(d.cutoutOffsetLength) + Number(d.cutoutLength)) *
+      scale;
+}
+
+// PION
+if (board.grainDirection === 'vertical') {
+  for (let x = minX - 20; x <= maxX + 20; x += spacing) {
+
+    // poza otworem
+    if (!hasCutout || x < cutLeft || x > cutRight) {
+      pdf.line(x, minY - 40, x, maxY + 40);
+      continue;
     }
+
+    // nad otworem
+    pdf.line(x, minY - 40, x, cutTop);
+
+    // pod otworem
+    pdf.line(x, cutBottom, x, maxY + 40);
   }
+}
+
+// POZIOM
+if (board.grainDirection === 'horizontal') {
+  for (let y = minY - 20; y <= maxY + 20; y += spacing) {
+
+    // poza otworem
+    if (!hasCutout || y < cutTop || y > cutBottom) {
+      pdf.line(minX - 40, y, maxX + 40, y);
+      continue;
+    }
+
+    // lewa strona otworu
+    pdf.line(minX - 40, y, cutLeft, y);
+
+    // prawa strona otworu
+    pdf.line(cutRight, y, maxX + 40, y);
+  }
+}
 
   pdf.restoreGraphicsState();
 
