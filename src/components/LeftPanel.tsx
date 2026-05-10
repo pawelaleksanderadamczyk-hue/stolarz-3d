@@ -526,7 +526,34 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
 <button className="copy-btn" onClick={() => copyBoard(board.id)}>Kopiuj</button>
 <button className="delete-btn" onClick={() => removeBoard(board.id)}>Usuń</button>
 
+<label
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '14px',
+    marginLeft: '28px',
+    fontSize: '15px',
+    cursor: 'pointer'
+  }}
+>
+  <input
+    type="checkbox"
+    checked={Boolean(board.printSelected)}
+    onChange={(e) =>
+      updateBoard(board.id, {
+        printSelected: e.target.checked
+      })
+    }
+    style={{
+      width: '18px',
+      height: '18px',
+      cursor: 'pointer'
+    }}
+  />
 
+  <span>Wybierz do wydruku</span>
+</label>
 
     </aside>
   );
