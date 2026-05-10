@@ -365,24 +365,12 @@ function drawEdgingSquares(
     drawEdgingSquare(pdf, board, 'lengthLeft', [0, 0], [0, d.length1], startX, startY, scale);
     drawEdgingSquare(pdf, board, 'lengthRight', [d.width1, 0], [d.width1, d.length2], startX, startY, scale);
 
-const hasDiagonalEdging =
-  Boolean(board.edging?.notchDiagonal) ||
-  Boolean(board.edging?.cutCorner) ||
-  Boolean(board.edging?.diagonal) ||
-  Boolean(board.edging?.cornerCut) ||
-  Boolean(board.edging?.widthTop);
 drawEdgingSquare(
   pdf,
-  {
-    ...board,
-    edging: {
-      ...board.edging,
-      diagonalPdfSafe: hasDiagonalEdging
-    }
-  },
-  'diagonalPdfSafe',
-  [Number(d.width2), Number(d.length1)],
-  [Number(d.width1), Number(d.length2)],
+  board,
+  'cut',
+  [d.width2, d.length1],
+  [d.width1, d.length2],
   startX,
   startY,
   scale
