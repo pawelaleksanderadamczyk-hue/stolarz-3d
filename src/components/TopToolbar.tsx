@@ -430,6 +430,78 @@ if (board.shape === 'RECT_INNER_CUTOUT') {
 
 
 
+
+function drawGrainDirection(
+  pdf: jsPDF,
+  board: any,
+  points: PdfPoint[],
+  startX: number,
+  startY: number,
+  scale: number
+) {
+  if (!board.grainDirection || board.grainDirection === 'none') return;
+
+  const pdfPoints = points.map((p) =>
+    toPdfPoint(p, startX, startY, scale)
+  );
+
+  const xs = pdfPoints.map((p) => p[0]);
+  const ys = pdfPoints.map((p) => p[1]);
+
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  // KLIP do prawdziwego kształtu formatki
+  pdf.saveGraphicsState();
+
+  pdf.moveTo(pdfPoints[0][0], pdfPoints[0][1]);
+
+  for (let i = 1; i < pdfPoints.length; i++) {
+    pdf.lineTo(pdfPoints[i][0], pdfPoints[i][1]);
+  }
+
+  pdf.close();
+  pdf.clip();
+
+  pdf.setLineWidth(0.03);
+  pdf.setDrawColor(170);
+
+  const spacing = 7;
+
+  // PION
+  if (board.grainDirection === 'vertical') {
+    for (let x = minX - 20; x <= maxX + 20; x += spacing) {
+      pdf.line(x, minY - 40, x, maxY + 40);
+    }
+  }
+
+  // POZIOM
+  if (board.grainDirection === 'horizontal') {
+    for (let y = minY - 20; y <= maxY + 20; y += spacing) {
+      pdf.line(minX - 40, y, maxX + 40, y);
+    }
+  }
+
+  pdf.restoreGraphicsState();
+
+  pdf.setDrawColor(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function printSelectedBoardsToPdf() {
   const project = useProjectStore.getState().project;
   const boards = project.boards.filter((b: any) => b.printSelected);
@@ -466,9 +538,10 @@ function printSelectedBoardsToPdf() {
   );
 }
 
+drawGrainDirection(pdf, board, points, startX, startY, scale);
 drawShape(pdf, points, startX, startY, scale);
 drawEdgingSquares(pdf, board, startX, startY, scale);
-    drawTechnicalDimensions(pdf, board, points, startX, startY, scale);
+drawTechnicalDimensions(pdf, board, points, startX, startY, scale);
   });
   pdf.save('formatki-do-druku.pdf');
 }
