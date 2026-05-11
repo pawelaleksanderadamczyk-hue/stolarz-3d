@@ -427,7 +427,8 @@ function GrainOverlay({ board }: { board: BoardItem }) {
     const vertices: number[] = [];
     const spacing = 45;
 
-const z = 0;
+const zFront = 0;
+const zBack = -18;
 
 const pushLine = (
   x1: number,
@@ -438,14 +439,24 @@ const pushLine = (
   vertices.push(
     x1 ,
     y1 ,
-    z
+    zFront
 
   );
-
   vertices.push(
     x2 ,
     y2 ,
-    z
+    zFront
+  );
+vertices.push(
+    x1 ,
+    y1 ,
+    zBack
+
+  );
+  vertices.push(
+    x2 ,
+    y2 ,
+    zBack
   );
 };
 
@@ -493,8 +504,8 @@ const pushLine = (
       <lineBasicMaterial
         color="#000000"
         transparent
-        opacity={0.18}
-        depthTest={false}
+        opacity={0.4}
+        depthTest={true}
         depthWrite={false}
       />
     </lineSegments>
@@ -550,6 +561,8 @@ const color = selected
           side={THREE.DoubleSide}
           roughness={0.85}
           metalness={0.05}
+//transparent
+//opacity={0.99}
         />
       </mesh>
       <EdgeStrips board={board} />
