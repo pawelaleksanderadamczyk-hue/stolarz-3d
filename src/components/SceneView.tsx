@@ -18,6 +18,9 @@ function AxisHelper() {
   );
 }
 
+
+
+
 const VIEW_POSITIONS: Record<ViewMode, [number, number, number]> = {
   IZOMETRIA: [1200, 900, 1200],
   GÓRA: [0, 2400, 0.001],
@@ -406,29 +409,25 @@ function getIntersectionsX(y: number, pts: GrainPoint[]) {
 }
 
 function GrainOverlay({ board }: { board: BoardItem }) {
+const thickness =
+  (board.dimensions as any).thickness ?? 18;
   if (!board.grainDirection || board.grainDirection === 'none') return null;
-
   const geometry = useMemo(() => {
     const points = getGrainPoints(board);
     const b = getGrainBounds(points);
-    const d: any = board.dimensions;
-
-    
-    
+    const d: any = board.dimensions;    
     const hasCutout =
       board.shape === 'RECT_INNER_CUTOUT' ||
       board.shape === 'TRAPEZOID_INNER_CUTOUT';
-
     const cutLeft = hasCutout ? Number(d.cutoutOffsetWidth) : 0;
     const cutRight = hasCutout ? Number(d.cutoutOffsetWidth) + Number(d.cutoutWidth) : 0;
     const cutBottom = hasCutout ? Number(d.cutoutOffsetLength) : 0;
     const cutTop = hasCutout ? Number(d.cutoutOffsetLength) + Number(d.cutoutLength) : 0;
-
     const vertices: number[] = [];
     const spacing = 45;
 
 const zFront = 0;
-const zBack = -18;
+const zBack = -thickness;
 
 const pushLine = (
   x1: number,
