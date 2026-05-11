@@ -171,9 +171,6 @@ case 'TRAPEZOID_INNER_CUTOUT': {
     { key: 'otwórPrawo', start: [d.cutoutOffsetLength, d.cutoutOffsetWidth + d.cutoutWidth], end: [d.cutoutOffsetLength + d.cutoutLength, d.cutoutOffsetWidth + d.cutoutWidth], hole: true }
   ];
 }
-
-
-
   }
 }
 
@@ -283,6 +280,237 @@ const oy = isTrapezoid ? 0 : ny * dir * (bandDepth / 2 + 0.2);
   );
 }
 
+
+
+
+
+
+
+
+
+type GrainPoint = [number, number];
+
+function getGrainPoints(board: BoardItem): GrainPoint[] {
+  const d: any = board.dimensions;
+
+  switch (board.shape) {
+    case 'RECT':
+    case 'RECT_INNER_CUTOUT':
+      return [
+        [0, 0],
+        [d.width, 0],
+        [d.width, d.length],
+        [0, d.length]
+      ];
+
+    case 'RECT_CUT_CORNER':
+      return [
+        [0, 0],
+        [d.width1, 0],
+        [d.width1, d.length2],
+        [d.width2, d.length1],
+        [0, d.length1]
+      ];
+
+    case 'RECT_CORNER_NOTCH':
+      return [
+        [0, 0],
+        [d.width1, 0],
+        [d.width1, d.length2],
+        [d.width2, d.length2],
+        [d.width2, d.length1],
+        [0, d.length1]
+      ];
+
+    case 'RIGHT_TRAPEZOID':
+      return [
+        [0, 0],
+        [d.width, 0],
+        [d.width, d.lengthRight],
+        [0, d.lengthLeft]
+      ];
+
+    case 'TRAPEZOID':
+    case 'TRAPEZOID_INNER_CUTOUT':
+      return [
+        [0, 0],
+        [d.width, 0],
+        [d.width - d.rightInset, d.height],
+        [d.leftInset, d.height]
+      ];
+
+    default:
+      return [
+        [0, 0],
+        [100, 0],
+        [100, 100],
+        [0, 100]
+      ];
+  }
+}
+
+function getGrainBounds(points: GrainPoint[]) {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+    width: Math.max(...xs) - Math.min(...xs),
+    height: Math.max(...ys) - Math.min(...ys)
+  };
+}
+
+function getIntersectionsY(x: number, pts: GrainPoint[]) {
+  const ys: number[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+
+    const [x1, y1] = a;
+    const [x2, y2] = b;
+
+    if (x1 === x2) continue;
+
+    if ((x >= x1 && x <= x2) || (x >= x2 && x <= x1)) {
+      const t = (x - x1) / (x2 - x1);
+      ys.push(y1 + (y2 - y1) * t);
+    }
+  }
+
+  return ys.sort((a, b) => a - b);
+}
+
+function getIntersectionsX(y: number, pts: GrainPoint[]) {
+  const xs: number[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+
+    const [x1, y1] = a;
+    const [x2, y2] = b;
+
+    if (y1 === y2) continue;
+
+    if ((y >= y1 && y <= y2) || (y >= y2 && y <= y1)) {
+      const t = (y - y1) / (y2 - y1);
+      xs.push(x1 + (x2 - x1) * t);
+    }
+  }
+
+  return xs.sort((a, b) => a - b);
+}
+
+function GrainOverlay({ board }: { board: BoardItem }) {
+  if (!board.grainDirection || board.grainDirection === 'none') return null;
+
+  const geometry = useMemo(() => {
+    const points = getGrainPoints(board);
+    const b = getGrainBounds(points);
+    const d: any = board.dimensions;
+
+    
+    
+    const hasCutout =
+      board.shape === 'RECT_INNER_CUTOUT' ||
+      board.shape === 'TRAPEZOID_INNER_CUTOUT';
+
+    const cutLeft = hasCutout ? Number(d.cutoutOffsetWidth) : 0;
+    const cutRight = hasCutout ? Number(d.cutoutOffsetWidth) + Number(d.cutoutWidth) : 0;
+    const cutBottom = hasCutout ? Number(d.cutoutOffsetLength) : 0;
+    const cutTop = hasCutout ? Number(d.cutoutOffsetLength) + Number(d.cutoutLength) : 0;
+
+    const vertices: number[] = [];
+    const spacing = 45;
+
+const z = 0;
+
+const pushLine = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+) => {
+  vertices.push(
+    x1 ,
+    y1 ,
+    z
+
+  );
+
+  vertices.push(
+    x2 ,
+    y2 ,
+    z
+  );
+};
+
+    if (board.grainDirection === 'vertical') {
+      for (let x = b.minX + spacing; x < b.maxX; x += spacing) {
+        const ys = getIntersectionsY(x, points);
+        if (ys.length < 2) continue;
+
+        const y1 = ys[0];
+        const y2 = ys[ys.length - 1];
+
+        if (!hasCutout || x < cutLeft || x > cutRight) {
+          pushLine(x, y1 + 2, x, y2 - 2);
+        } else {
+          pushLine(x, y1 + 2, x, cutBottom - 2);
+          pushLine(x, cutTop + 2, x, y2 - 2);
+        }
+      }
+    }
+
+    if (board.grainDirection === 'horizontal') {
+      for (let y = b.minY + spacing; y < b.maxY; y += spacing) {
+        const xs = getIntersectionsX(y, points);
+        if (xs.length < 2) continue;
+
+        const x1 = xs[0];
+        const x2 = xs[xs.length - 1];
+
+        if (!hasCutout || y < cutBottom || y > cutTop) {
+          pushLine(x1 + 2, y, x2 - 2, y);
+        } else {
+          pushLine(x1 + 2, y, cutLeft - 2, y);
+          pushLine(cutRight + 2, y, x2 - 2, y);
+        }
+      }
+    }
+
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    return g;
+  }, [board]);
+
+  return (
+    <lineSegments geometry={geometry} renderOrder={2}>
+      <lineBasicMaterial
+        color="#000000"
+        transparent
+        opacity={0.18}
+        depthTest={false}
+        depthWrite={false}
+      />
+    </lineSegments>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
 function BoardMesh({ board, selected }: { board: BoardItem; selected: boolean }) {
   const selectBoard = useProjectStore((s) => s.selectBoard);
   const materials = useProjectStore((s) => s.project.materials);
@@ -325,9 +553,25 @@ const color = selected
         />
       </mesh>
       <EdgeStrips board={board} />
+
+
+<group rotation={[-Math.PI, 0, -Math.PI / 2]}>
+  <GrainOverlay board={board} />
+</group>
+
+
+
+
     </group>
   );
 }
+
+
+
+
+
+
+
 
 
 type DragPoint = { x: number; y: number };
