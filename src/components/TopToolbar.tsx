@@ -746,6 +746,66 @@ export function TopToolbar() {
 />
                   </label>
                 ))}
+
+
+{family !== 'okleina' && (
+  <label>
+    Słój
+    <select
+      value={(project as any).defaultGrainDirections?.[family] ?? 'vertical'}
+      onChange={(e) => {
+  const nextGrain =
+    e.target.value as 'none' | 'vertical' | 'horizontal';
+
+  const state = useProjectStore.getState();
+
+  const roleForFamily =
+    family === 'korpus'
+      ? 'KORPUS'
+      : family === 'front'
+      ? 'FRONT'
+      : family === 'blat'
+      ? 'BLAT'
+      : family === 'hdf'
+      ? 'HDF'
+      : family === 'inne'
+      ? 'INNE'
+      : null;
+
+  useProjectStore.setState({
+    project: {
+      ...state.project,
+      defaultGrainDirections: {
+        korpus: 'vertical',
+        front: 'vertical',
+        blat: 'vertical',
+        hdf: 'vertical',
+        inne: 'vertical',
+        ...(state.project as any).defaultGrainDirections,
+        [family]: nextGrain
+      },
+      boards: state.project.boards.map((board) =>
+        roleForFamily && board.role === roleForFamily
+          ? {
+              ...board,
+              grainDirection: nextGrain
+            }
+          : board
+      )
+    }
+  });
+}}
+    >
+      <option value="vertical">Pion</option>
+      <option value="horizontal">Poziom</option>
+      <option value="none">Brak</option>
+    </select>
+  </label>
+)}
+
+
+
+
               </div>
             ))}
           </div>

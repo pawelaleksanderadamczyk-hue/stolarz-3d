@@ -36,6 +36,15 @@ export function createEmptyProject(): ProjectData {
     },
     globalAnchor: { x: 0, y: 0, z: 0 },
     materials: DEFAULT_PROJECT_MATERIALS,
+
+defaultGrainDirections: {
+  korpus: 'vertical',
+  front: 'vertical',
+  blat: 'vertical',
+  hdf: 'vertical',
+  inne: 'vertical'
+},
+
     boards: []
   };
 }
@@ -95,7 +104,18 @@ export function createBoard(project: ProjectData, form: NewBoardForm): BoardItem
     id: createId(),
     number,
     name: '',
-grainDirection: 'vertical',
+grainDirection:
+  project.defaultGrainDirections?.[
+    form.role === 'KORPUS'
+      ? 'korpus'
+      : form.role === 'FRONT'
+      ? 'front'
+      : form.role === 'BLAT'
+      ? 'blat'
+      : form.role === 'HDF'
+      ? 'hdf'
+      : 'inne'
+  ] ?? 'vertical',
 cabinetName: '',
     shape: form.shape,
     role: form.role,

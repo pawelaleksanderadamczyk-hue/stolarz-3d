@@ -94,6 +94,13 @@ export interface ProjectData {
   nextCounters: Record<ShapeType, number>;
   globalAnchor: Vec3;
   materials: ProjectMaterialPalette;
+defaultGrainDirections?: {
+  korpus: 'none' | 'vertical' | 'horizontal';
+  front: 'none' | 'vertical' | 'horizontal';
+  blat: 'none' | 'vertical' | 'horizontal';
+  hdf: 'none' | 'vertical' | 'horizontal';
+  inne: 'none' | 'vertical' | 'horizontal';
+};
   boards: BoardItem[];
 }
 
