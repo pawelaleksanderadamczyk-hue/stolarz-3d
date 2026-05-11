@@ -428,6 +428,61 @@ if (board.shape === 'RECT_INNER_CUTOUT') {
 
 
 
+function getIntersectionsY(x: number, pts: PdfPoint[]) {
+  const ys: number[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+
+    const x1 = a[0];
+    const y1 = a[1];
+    const x2 = b[0];
+    const y2 = b[1];
+
+    if ((x >= x1 && x <= x2) || (x >= x2 && x <= x1)) {
+      if (x1 === x2) continue;
+
+      const t = (x - x1) / (x2 - x1);
+      const y = y1 + (y2 - y1) * t;
+
+      ys.push(y);
+    }
+  }
+
+  return ys.sort((a, b) => a - b);
+}
+
+function getIntersectionsX(y: number, pts: PdfPoint[]) {
+  const xs: number[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+
+    const x1 = a[0];
+    const y1 = a[1];
+    const x2 = b[0];
+    const y2 = b[1];
+
+    if ((y >= y1 && y <= y2) || (y >= y2 && y <= y1)) {
+      if (y1 === y2) continue;
+
+      const t = (y - y1) / (y2 - y1);
+      const x = x1 + (x2 - x1) * t;
+
+      xs.push(x);
+    }
+  }
+
+  return xs.sort((a, b) => a - b);
+}
+
+
+
+
+
+
 
 
 
@@ -501,37 +556,41 @@ if (hasCutout) {
 
 // PION
 if (board.grainDirection === 'vertical') {
-  for (let x = minX - 20; x <= maxX + 20; x += spacing) {
+  for (let x = minX + spacing; x < maxX; x += spacing) {
 
-    // poza otworem
+    const ys = getIntersectionsY(x, pdfPoints);
+
+    if (ys.length < 2) continue;
+
+    const yTop = ys[0];
+    const yBottom = ys[ys.length - 1];
+
     if (!hasCutout || x < cutLeft || x > cutRight) {
-      pdf.line(x, minY - 40, x, maxY + 40);
-      continue;
+      pdf.line(x, yTop + 0.5, x, yBottom - 0.5);
+    } else {
+      pdf.line(x, yTop + 0.5, x, cutTop - 0.5);
+      pdf.line(x, cutBottom + 0.5, x, yBottom - 0.5);
     }
-
-    // nad otworem
-    pdf.line(x, minY - 40, x, cutTop);
-
-    // pod otworem
-    pdf.line(x, cutBottom, x, maxY + 40);
   }
 }
 
 // POZIOM
 if (board.grainDirection === 'horizontal') {
-  for (let y = minY - 20; y <= maxY + 20; y += spacing) {
+  for (let y = minY + spacing; y < maxY; y += spacing) {
 
-    // poza otworem
+    const xs = getIntersectionsX(y, pdfPoints);
+
+    if (xs.length < 2) continue;
+
+    const xLeft = xs[0];
+    const xRight = xs[xs.length - 1];
+
     if (!hasCutout || y < cutTop || y > cutBottom) {
-      pdf.line(minX - 40, y, maxX + 40, y);
-      continue;
+      pdf.line(xLeft + 0.5, y, xRight - 0.5, y);
+    } else {
+      pdf.line(xLeft + 0.5, y, cutLeft - 0.5, y);
+      pdf.line(cutRight + 0.5, y, xRight - 0.5, y);
     }
-
-    // lewa strona otworu
-    pdf.line(minX - 40, y, cutLeft, y);
-
-    // prawa strona otworu
-    pdf.line(cutRight, y, maxX + 40, y);
   }
 }
 

@@ -485,7 +485,7 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
     value={board.grainDirection ?? 'none'}
     onChange={(e) =>
       updateBoard(board.id, {
-        grainDirection: e.target.value
+        grainDirection: e.target.value as 'none' | 'vertical' | 'horizontal'
       })
     }
   >

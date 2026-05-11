@@ -95,7 +95,7 @@ export function createBoard(project: ProjectData, form: NewBoardForm): BoardItem
     id: createId(),
     number,
     name: '',
-grainDirection: 'PION',
+grainDirection: 'vertical',
 cabinetName: '',
     shape: form.shape,
     role: form.role,
