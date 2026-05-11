@@ -7,6 +7,8 @@ import { createBoardGeometry } from '../core/geometry';
 import { getBoardRotationQuaternion, getPlaneBasis } from '../core/project';
 import { useProjectStore } from '../store/useProjectStore';
 import type { BoardItem, Vec3, ViewMode } from '../types';
+import { getLeadingCorner, getOuterVertices3D } from '../core/project';
+
 
 function AxisHelper() {
   return (
@@ -532,6 +534,8 @@ const color = selected
   ? '#f5a623'
   : COLOR_TO_HEX[materialColor] ?? '#d8b16a';
 
+const selectedBoardId = useProjectStore((s) => s.selectedBoardId);
+
   const geometry = useMemo(() => createBoardGeometry(board), [board]);
   const planeQuaternion = useMemo(() => getPlaneQuaternion(board), [board.plane]);
   const finalQuaternion = useMemo(
@@ -547,8 +551,17 @@ const color = selected
       board.rotationQuaternion?.w
     ]
   );
+const leadingCorner = getLeadingCorner(board);
+const vertices = getOuterVertices3D(board);
+
+const markerPosition: [number, number, number] = [
+  leadingCorner.x - board.anchor.x,
+  leadingCorner.y - board.anchor.y,
+  leadingCorner.z - board.anchor.z
+];
 
   return (
+  <>
     <group
       position={[board.anchor.x, board.anchor.y, board.anchor.z]}
       quaternion={finalQuaternion}
@@ -560,22 +573,62 @@ const color = selected
           side={THREE.DoubleSide}
           roughness={0.85}
           metalness={0.05}
-//transparent
-//opacity={0.99}
         />
       </mesh>
-      <EdgeStrips board={board} />
 
+      <EdgeStrips board={board} />
 
 <group rotation={[-Math.PI, 0, -Math.PI / 2]}>
   <GrainOverlay board={board} />
 </group>
 
+</group>
+{selectedBoardId === board.id && (
+  <mesh
+    position={[
+      leadingCorner.x,
+      leadingCorner.y,
+      leadingCorner.z
+    ]}
+    renderOrder={20}
+  >
+    <sphereGeometry args={[4, 16, 16]} />
+    <meshBasicMaterial color="red" depthTest={false} />
+  </mesh>
+)}
+
+{selectedBoardId === board.id &&
+  vertices.map((v, i) => {
+    const isLeading =
+      Math.abs(v.x - leadingCorner.x) < 0.001 &&
+      Math.abs(v.y - leadingCorner.y) < 0.001 &&
+      Math.abs(v.z - leadingCorner.z) < 0.001;
+
+    if (isLeading) return null;
+
+    return (
+      <mesh
+        key={i}
+        position={[v.x, v.y, v.z]}
+        renderOrder={10}
+      >
+        <sphereGeometry args={[4, 10, 10]} />
+
+        <meshBasicMaterial
+          color="#4da6ff"
+          depthTest={false}
+        />
+      </mesh>
+    );
+  })}
 
 
 
-    </group>
-  );
+
+
+    
+  </>
+);
 }
 
 
