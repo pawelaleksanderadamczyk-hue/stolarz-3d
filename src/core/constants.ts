@@ -95,3 +95,84 @@ export const SHAPE_CODES: Record<ShapeType, string> = {
   TRAPEZOID: 'TR',
   TRAPEZOID_INNER_CUTOUT: 'TR/OPR'
 };
+
+
+export const MATERIAL_OPTIONS = [
+  {
+    id: '5527-stone-oak',
+    name: '5527 Stone Oak',
+    type: 'texture',
+    texture: '/textures/5527_Stone_Oak.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: 'k003-gold-craft-oak',
+    name: 'K003 Gold Craft Oak',
+    type: 'texture',
+    texture: '/textures/K003_Gold_Craft_Oak.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: 'k365-coast-evoke-oak',
+    name: 'K365 Coast Evoke Oak',
+    type: 'texture',
+    texture: '/textures/K365_Coast_Evoke_Oak.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: '4298-light-atelier',
+    name: '4298 Light Atelier',
+    type: 'texture',
+    texture: '/textures/4298_Light_Atelier.jpg',
+    hasGrain: false
+  },
+
+  {
+    id: 'bialy',
+    name: 'Biały',
+    type: 'color',
+    color: '#ffffff',
+    hasGrain: false
+  },
+
+{
+  id: 'niebieski',
+  name: 'Niebieski',
+  type: 'color',
+  color: '#87b5ff',
+  hasGrain: false
+},
+
+{
+  id: 'zolty',
+  name: 'Żółty',
+  type: 'color',
+  color: '#ffe066',
+  hasGrain: false
+},
+
+{
+  id: 'czerwony',
+  name: 'Czerwony',
+  type: 'color',
+  color: '#ff6b6b',
+  hasGrain: false
+},
+
+{
+  id: 'czarny',
+  name: 'Czarny',
+  type: 'color',
+  color: '#111111',
+  hasGrain: false
+}
+
+
+] as const;
+
+
+
+

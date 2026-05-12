@@ -1,4 +1,4 @@
-import { DEFAULT_PROJECT_MATERIALS, SHAPE_CODES } from './constants';
+import { DEFAULT_PROJECT_MATERIALS, SHAPE_CODES, MATERIAL_OPTIONS } from './constants';
 import * as THREE from 'three';
 import type {
   BoardItem,
@@ -36,6 +36,8 @@ export function createEmptyProject(): ProjectData {
     },
     globalAnchor: { x: 0, y: 0, z: 0 },
     materials: DEFAULT_PROJECT_MATERIALS,
+
+materialLibrary: MATERIAL_OPTIONS,
 
 defaultGrainDirections: {
   korpus: 'vertical',
