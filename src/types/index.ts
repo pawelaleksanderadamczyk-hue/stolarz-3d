@@ -114,3 +114,12 @@ export interface NewBoardForm {
 }
 
 export type ViewMode = 'IZOMETRIA' | 'GÓRA' | 'PRZÓD' | 'BOK';
+
+export type MaterialOption = {
+  id: string;
+  name: string;
+  type: 'color' | 'texture';
+  color?: string;
+  texture?: string;
+  hasGrain: boolean;
+};

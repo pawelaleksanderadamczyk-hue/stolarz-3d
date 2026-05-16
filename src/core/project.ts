@@ -1,4 +1,4 @@
-import { DEFAULT_PROJECT_MATERIALS, SHAPE_CODES, MATERIAL_OPTIONS } from './constants';
+import { SHAPE_CODES } from './constants';
 import * as THREE from 'three';
 import type {
   BoardItem,
@@ -35,9 +35,8 @@ export function createEmptyProject(): ProjectData {
 	TRAPEZOID_INNER_CUTOUT: 1
     },
     globalAnchor: { x: 0, y: 0, z: 0 },
-    materials: DEFAULT_PROJECT_MATERIALS,
+    materials: DEFAULT_PROJECT_MATERIALS as any,
 
-materialLibrary: MATERIAL_OPTIONS,
 
 defaultGrainDirections: {
   korpus: 'vertical',
@@ -471,3 +470,42 @@ export function moveBoardByLeadingCorner(board: BoardItem, target: Vec3): BoardI
     }
   };
 }
+
+
+export const DEFAULT_PROJECT_MATERIALS = {
+  korpus: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  },
+
+  front: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  },
+
+  blat: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  },
+
+  hdf: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  },
+
+  inne: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  },
+
+  okleina: {
+    1: 'bialy-polysk',
+    2: 'niebieski',
+    3: 'ciemnoczerwony'
+  }
+};

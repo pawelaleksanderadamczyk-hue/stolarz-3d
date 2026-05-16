@@ -3,14 +3,17 @@ import { COLORS } from '../core/constants';
 import { useProjectStore } from '../store/useProjectStore';
 import type { MaterialIndex, ViewMode } from '../types';
 import { saveProjectToFile } from '../utils/saveProject';
-const VIEW_TABS: ViewMode[] = ['IZOMETRIA', 'GÓRA', 'PRZÓD', 'BOK'];
 import { ColorSelect } from './ColorSelect';
 import { jsPDF } from 'jspdf';
+const VIEW_TABS: ViewMode[] = ['IZOMETRIA', 'GÓRA', 'PRZÓD', 'BOK'];
 
 const handleSave = () => {
   const project = useProjectStore.getState().project;
   saveProjectToFile(project);
 };
+
+
+
 
 
 type PdfPoint = [number, number];
@@ -658,10 +661,11 @@ drawTechnicalDimensions(pdf, board, points, startX, startY, scale);
 
 
 export function TopToolbar() {
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  
+
+const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
-
 
   const {
     project,
@@ -702,7 +706,7 @@ export function TopToolbar() {
           />
           <button onClick={exportCsv}>Export CSV</button>
 	  <button onClick={printSelectedBoardsToPdf}>Drukuj wybrane</button>
-          <button onClick={() => setMaterialsOpen((prev) => !prev)}>Materiał</button>
+          <button onClick={() => {setMaterialsOpen((prev) => !prev)}}>Materiał</button>
           <button onClick={openAddBoardModal}>Dodaj formatkę</button>
           <button onClick={() => setAnchorOpen((prev) => !prev)}>Narożnik dodawanych</button>
           <button onClick={resetView}>Reset widoku</button>
@@ -742,7 +746,11 @@ export function TopToolbar() {
                     {label} {index}
                     <ColorSelect
   value={(project.materials as any)?.[family]?.[index as MaterialIndex] ?? 'biały'}
-  onChange={(color) => setProjectMaterial(family as any, index as MaterialIndex, color)}
+  onChange={(color) => setProjectMaterial(
+  family as any,
+  index as MaterialIndex,
+  color as any
+)}
 />
                   </label>
                 ))}
@@ -808,9 +816,17 @@ export function TopToolbar() {
 
               </div>
             ))}
+
+
+
+
+
+
           </div>
         </div>
       )}
+
+
 
       {anchorOpen && (
         <div className="toolbar-panel toolbar-panel-anchor">

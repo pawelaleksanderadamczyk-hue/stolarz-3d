@@ -466,16 +466,30 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         <label>
           Materiał formatki
           <select value={board.material.materialIndex} onChange={(e) => updateBoard(board.id, { material: { ...board.material, materialIndex: Number(e.target.value) as MaterialIndex } })}>
-            {roleMaterialOptions(board.role).map((idx) => <option key={idx} value={idx}>{board.role} {idx} — {project.materials[projectMaterialFamily][idx]}</option>)}
+            {roleMaterialOptions(board.role).map((idx) => <option key={idx} value={idx}>{board.role} {idx} — {project.materials?.[projectMaterialFamily]?.[idx] ?? 'Brak'}</option>)}
           </select>
         </label>
 
         <label>
-          Kolor okleiny
-          <select value={board.material.edgingIndex} onChange={(e) => updateBoard(board.id, { material: { ...board.material, edgingIndex: Number(e.target.value) as MaterialIndex } })}>
-            {[1,2,3].map((idx) => <option key={idx} value={idx}>OKLEINA {idx} — {project.materials.okleina[idx as MaterialIndex]}</option>)}
-          </select>
-        </label>
+  Kolor okleiny
+  <select
+    value={board.material.edgingIndex}
+    onChange={(e) =>
+      updateBoard(board.id, {
+        material: {
+          ...board.material,
+          edgingIndex: Number(e.target.value) as MaterialIndex
+        }
+      })
+    }
+  >
+    {[1, 2, 3].map((idx) => (
+      <option key={idx} value={idx}>
+        OKLEINA {idx} — {project.materials?.okleina?.[idx as MaterialIndex] ?? 'Brak'}
+      </option>
+    ))}
+  </select>
+</label>
       </div>
 
 

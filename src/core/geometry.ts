@@ -175,10 +175,27 @@ export function getThickness(item: BoardItem) {
 
 export function createBoardGeometry(item: BoardItem) {
   const shape = getShape2D(item);
-  return new THREE.ExtrudeGeometry(shape, {
+  const geometry = new THREE.ExtrudeGeometry(shape, {
     depth: getThickness(item),
     bevelEnabled: false
   });
+  const pos = geometry.attributes.position;
+  const uvs: number[] = [];
+  // 600 mm = pełny rozmiar tekstury
+  const textureScale = 600;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    uvs.push(
+      x / textureScale,
+      y / textureScale
+    );
+  }
+  geometry.setAttribute(
+    'uv',
+    new THREE.Float32BufferAttribute(uvs, 2)
+  );
+  return geometry;
 }
 
 export function createEdgeGeometry(width: number, thickness: number, length: number) {

@@ -98,79 +98,249 @@ export const SHAPE_CODES: Record<ShapeType, string> = {
 
 
 export const MATERIAL_OPTIONS = [
+  // ===== TEKSTURY =====
+
   {
-    id: '5527-stone-oak',
-    name: '5527 Stone Oak',
+    id: 'dab-kamienny',
+    name: 'Dąb Kamienny',
     type: 'texture',
-    texture: '/textures/5527_Stone_Oak.jpg',
+    texture: '/textures/Dąb_Kamienny.jpg',
     hasGrain: true
   },
 
   {
-    id: 'k003-gold-craft-oak',
-    name: 'K003 Gold Craft Oak',
+    id: 'dab-zloty',
+    name: 'Dąb Złoty',
     type: 'texture',
-    texture: '/textures/K003_Gold_Craft_Oak.jpg',
+    texture: '/textures/Dąb_Złoty.jpg',
     hasGrain: true
   },
 
   {
-    id: 'k365-coast-evoke-oak',
-    name: 'K365 Coast Evoke Oak',
+    id: 'dab-sonoma',
+    name: 'Dąb Sonoma',
     type: 'texture',
-    texture: '/textures/K365_Coast_Evoke_Oak.jpg',
+    texture: '/textures/Dąb_Sonoma.png',
     hasGrain: true
   },
 
   {
-    id: '4298-light-atelier',
-    name: '4298 Light Atelier',
+    id: 'dab-czekoladowy',
+    name: 'Dąb Czekoladowy',
     type: 'texture',
-    texture: '/textures/4298_Light_Atelier.jpg',
+    texture: '/textures/Dąb_Czekoladowy.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: 'kaszmir',
+    name: 'Kaszmir',
+    type: 'texture',
+    texture: '/textures/Kaszmir.jpg',
     hasGrain: false
   },
+
+  {
+    id: 'kremowy',
+    name: 'Kremowy',
+    type: 'texture',
+    texture: '/textures/Kremowy.jpg',
+    hasGrain: false
+  },
+
+  // ===== KOLORY =====
 
   {
     id: 'bialy',
     name: 'Biały',
     type: 'color',
+    color: '#f5f5f5',
+    hasGrain: false
+  },
+
+  {
+    id: 'bialy-polysk',
+    name: 'Biały Połysk',
+    type: 'color',
     color: '#ffffff',
     hasGrain: false
   },
 
-{
-  id: 'niebieski',
-  name: 'Niebieski',
-  type: 'color',
-  color: '#87b5ff',
-  hasGrain: false
-},
+  {
+    id: 'grafit',
+    name: 'Grafit',
+    type: 'color',
+    color: '#374151',
+    hasGrain: false
+  },
 
-{
-  id: 'zolty',
-  name: 'Żółty',
-  type: 'color',
-  color: '#ffe066',
-  hasGrain: false
-},
+  {
+    id: 'czarny',
+    name: 'Czarny',
+    type: 'color',
+    color: '#111111',
+    hasGrain: false
+  },
 
-{
-  id: 'czerwony',
-  name: 'Czerwony',
-  type: 'color',
-  color: '#ff6b6b',
-  hasGrain: false
-},
+  {
+    id: 'szary-jasny',
+    name: 'Szary Jasny',
+    type: 'color',
+    color: '#d1d5db',
+    hasGrain: false
+  },
 
-{
-  id: 'czarny',
-  name: 'Czarny',
-  type: 'color',
-  color: '#111111',
-  hasGrain: false
-}
+  {
+    id: 'szary-ciemny',
+    name: 'Szary Ciemny',
+    type: 'color',
+    color: '#6b7280',
+    hasGrain: false
+  },
 
+  {
+    id: 'niebieski',
+    name: 'Niebieski',
+    type: 'color',
+    color: '#3b82f6',
+    hasGrain: false
+  },
 
+  {
+    id: 'ciemnoniebieski',
+    name: 'Ciemnoniebieski',
+    type: 'color',
+    color: '#1e3a8a',
+    hasGrain: false
+  },
+
+  {
+    id: 'blekitny',
+    name: 'Błękitny',
+    type: 'color',
+    color: '#38bdf8',
+    hasGrain: false
+  },
+
+  {
+    id: 'zielony',
+    name: 'Zielony',
+    type: 'color',
+    color: '#22c55e',
+    hasGrain: false
+  },
+
+  {
+    id: 'ciemnozielony',
+    name: 'Ciemnozielony',
+    type: 'color',
+    color: '#166534',
+    hasGrain: false
+  },
+
+  {
+    id: 'limonkowy',
+    name: 'Limonkowy',
+    type: 'color',
+    color: '#84cc16',
+    hasGrain: false
+  },
+
+  {
+    id: 'zolty',
+    name: 'Żółty',
+    type: 'color',
+    color: '#facc15',
+    hasGrain: false
+  },
+
+  {
+    id: 'zolty-jasny',
+    name: 'Żółty Jasny',
+    type: 'color',
+    color: '#fef08a',
+    hasGrain: false
+  },
+
+  {
+    id: 'pomaranczowy',
+    name: 'Pomarańczowy',
+    type: 'color',
+    color: '#f97316',
+    hasGrain: false
+  },
+
+  {
+    id: 'czerwony',
+    name: 'Czerwony',
+    type: 'color',
+    color: '#ef4444',
+    hasGrain: false
+  },
+
+  {
+    id: 'ciemnoczerwony',
+    name: 'Ciemnoczerwony',
+    type: 'color',
+    color: '#991b1b',
+    hasGrain: false
+  },
+
+  {
+    id: 'rozowy',
+    name: 'Różowy',
+    type: 'color',
+    color: '#ec4899',
+    hasGrain: false
+  },
+
+  {
+    id: 'fioletowy',
+    name: 'Fioletowy',
+    type: 'color',
+    color: '#a855f7',
+    hasGrain: false
+  },
+
+  {
+    id: 'lawendowy',
+    name: 'Lawendowy',
+    type: 'color',
+    color: '#c4b5fd',
+    hasGrain: false
+  },
+
+  {
+    id: 'bezowy',
+    name: 'Beżowy',
+    type: 'color',
+    color: '#e5c29f',
+    hasGrain: false
+  },
+
+  {
+    id: 'brazowy',
+    name: 'Brązowy',
+    type: 'color',
+    color: '#8b5a2b',
+    hasGrain: false
+  },
+
+  {
+    id: 'orzech',
+    name: 'Orzech',
+    type: 'color',
+    color: '#6b3e2e',
+    hasGrain: false
+  },
+
+  {
+    id: 'wenge',
+    name: 'Wenge',
+    type: 'color',
+    color: '#3b2f2f',
+    hasGrain: false
+  }
 ] as const;
 
 

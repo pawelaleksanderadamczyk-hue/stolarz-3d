@@ -68,6 +68,7 @@ interface ProjectStore {
   exportCsv: () => void;
   undo: () => void;
   redo: () => void;
+
 }
 
 function cloneProject(project: ProjectData): ProjectData {
@@ -504,6 +505,9 @@ setProjectMaterial: (family, index, color) => {
     project
   });
 },
+
+
+
 
   saveProjectToFile: () => {
     downloadFile('projekt-stolarz3d.json', JSON.stringify(get().project, null, 2), 'application/json');

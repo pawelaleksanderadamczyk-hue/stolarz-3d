@@ -1,14 +1,12 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Edges, Line } from '@react-three/drei';
+import { Canvas, useThree, useLoader } from '@react-three/fiber';import { OrbitControls, Edges, Line } from '@react-three/drei';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { COLOR_TO_HEX } from '../core/constants';
+import { COLOR_TO_HEX, MATERIAL_OPTIONS } from '../core/constants';
 import { createBoardGeometry } from '../core/geometry';
 import { getBoardRotationQuaternion, getPlaneBasis } from '../core/project';
 import { useProjectStore } from '../store/useProjectStore';
 import type { BoardItem, Vec3, ViewMode } from '../types';
 import { getLeadingCorner, getOuterVertices3D } from '../core/project';
-
 
 function AxisHelper() {
   return (
@@ -209,10 +207,30 @@ function getFinalQuaternion(planeQuaternion: THREE.Quaternion, board: BoardItem)
 
 function EdgeStrips({ board }: { board: BoardItem }) {
   const materials = useProjectStore((s) => s.project.materials);
-  const edgingName =
-  materials?.okleina?.[board.material.edgingIndex] ?? 'biały';
-const edgingColor =
-  COLOR_TO_HEX[edgingName] ?? '#ffffff';
+  const edgingMaterialId =
+  materials?.okleina?.[board.material.edgingIndex] ?? 'bialy';
+
+const materialLibrary = MATERIAL_OPTIONS;
+
+const edgingMaterial =
+  materialLibrary.find((m) => m.id === edgingMaterialId) ??
+  materialLibrary.find((m) => m.id === 'bialy')!;
+
+const loadedEdgingTexture = useLoader(
+  THREE.TextureLoader,
+  edgingMaterial.type === 'texture'
+    ? edgingMaterial.texture
+    : '/textures/Dąb_Złoty.jpg'
+);
+
+const edgingTexture = Array.isArray(loadedEdgingTexture)
+  ? loadedEdgingTexture[0].clone()
+  : loadedEdgingTexture.clone();
+
+edgingTexture.wrapS = THREE.RepeatWrapping;
+edgingTexture.wrapT = THREE.RepeatWrapping;
+edgingTexture.repeat.set(1, 1);
+edgingTexture.needsUpdate = true;
 
   const thickness = Number((board.dimensions as any).thickness ?? 18);
   const bandDepth = 0.4;
@@ -277,7 +295,14 @@ const oy = isTrapezoid ? 0 : ny * dir * (bandDepth / 2 + 0.2);
         return (
           <mesh key={seg.key} position={[mx + ox, my + oy, bandHeight / 2]} rotation={[0, 0, angle]} renderOrder={2}>
             <boxGeometry args={[len, bandDepth, bandHeight]} />
-            <meshStandardMaterial color={edgingColor} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} />
+            <meshStandardMaterial
+  key={edgingMaterial.id}
+  color={edgingMaterial.type === 'color' ? edgingMaterial.color : '#ffffff'}
+  map={edgingMaterial.type === 'texture' ? edgingTexture : undefined}
+  polygonOffset
+  polygonOffsetFactor={-1}
+  polygonOffsetUnits={-1}
+/>
           </mesh>
         );
       })}
@@ -526,7 +551,16 @@ vertices.push(
 function BoardMesh({ board, selected }: { board: BoardItem; selected: boolean }) {
   const selectBoard = useProjectStore((s) => s.selectBoard);
   const materials = useProjectStore((s) => s.project.materials);
-  const family = board.role === 'KORPUS' ? 'korpus' : board.role === 'FRONT' ? 'front' : 'blat';
+  const family =
+  board.role === 'KORPUS'
+    ? 'korpus'
+    : board.role === 'FRONT'
+    ? 'front'
+    : board.role === 'BLAT'
+    ? 'blat'
+    : board.role === 'HDF'
+    ? 'hdf'
+    : 'inne';
   const materialPalette = materials?.[family] ?? {};
 const materialColor =
   materialPalette?.[board.material.materialIndex] ?? 'biały';
@@ -537,6 +571,64 @@ const color = selected
 const selectedBoardId = useProjectStore((s) => s.selectedBoardId);
 
   const geometry = useMemo(() => createBoardGeometry(board), [board]);
+
+
+
+
+const selectedMaterialId =
+  materialPalette?.[board.material.materialIndex] ?? 'bialy';
+const materialLibrary = MATERIAL_OPTIONS;
+
+const selectedMaterial =
+  materialLibrary.find((m) => m.id === selectedMaterialId) ??
+  materialLibrary.find((m) => m.id === 'bialy')!;
+const loadedGrainTexture = useLoader(
+  THREE.TextureLoader,
+  selectedMaterial.type === 'texture'
+    ? selectedMaterial.texture
+    : '/textures/Dąb_Złoty.jpg'
+);
+
+const grainTexture = Array.isArray(loadedGrainTexture)
+  ? loadedGrainTexture[0].clone()
+  : loadedGrainTexture.clone();
+
+
+
+
+grainTexture.wrapS = THREE.RepeatWrapping;
+grainTexture.wrapT = THREE.RepeatWrapping;
+
+grainTexture.anisotropy = 16;
+grainTexture.needsUpdate = true;
+
+const textureW =
+  (board.dimensions as any).width ??
+  (board.dimensions as any).width1 ??
+  400;
+
+const textureH =
+  (board.dimensions as any).length ??
+  (board.dimensions as any).length1 ??
+  (board.dimensions as any).height ??
+  800;
+
+
+
+
+grainTexture.repeat.set(1, 1);
+
+grainTexture.offset.set(0, 0);
+grainTexture.center.set(0.5, 0.5);
+
+grainTexture.rotation =
+  board.grainDirection === 'vertical'
+    ? Math.PI / 2
+    : 0;
+
+grainTexture.needsUpdate = true;
+
+
   const planeQuaternion = useMemo(() => getPlaneQuaternion(board), [board.plane]);
   const finalQuaternion = useMemo(
     () => getFinalQuaternion(planeQuaternion, board),
@@ -568,19 +660,31 @@ const markerPosition: [number, number, number] = [
       onClick={(e) => { e.stopPropagation(); selectBoard(board.id); }}
     >
       <mesh geometry={geometry} renderOrder={1}>
-        <meshStandardMaterial
-          color={color}
-          side={THREE.DoubleSide}
-          roughness={0.85}
-          metalness={0.05}
-        />
+        
+
+
+<meshStandardMaterial
+  key={selectedMaterial.id}
+  color={
+    selected
+      ? '#f5a623'
+      : selectedMaterial.type === 'color'
+      ? selectedMaterial.color
+      : '#ffffff'
+  }
+  map={selectedMaterial.type === 'texture' ? grainTexture : undefined}
+  side={THREE.DoubleSide}
+  roughness={0.85}
+  metalness={0.05}
+/>
+
+
+
       </mesh>
 
       <EdgeStrips board={board} />
 
-<group rotation={[-Math.PI, 0, -Math.PI / 2]}>
-  <GrainOverlay board={board} />
-</group>
+
 
 </group>
 {selectedBoardId === board.id && (
@@ -630,11 +734,6 @@ const markerPosition: [number, number, number] = [
   </>
 );
 }
-
-
-
-
-
 
 
 
