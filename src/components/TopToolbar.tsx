@@ -134,7 +134,7 @@ function drawShape(
   scale: number,
   board?: any
 ) {
-  pdf.setLineWidth(1.05);
+  pdf.setLineWidth(0.35);
 
   // OBWÓD ZEWNĘTRZNY
   points.forEach((p, index) => {
@@ -250,7 +250,7 @@ function drawRectHole(
   scale: number
 ) {
   const [px, py] = toPdfPoint([x, y + h], startX, startY, scale);
-  pdf.setLineWidth(1.05);
+  pdf.setLineWidth(0.35);
   pdf.rect(px, py, w * scale, h * scale);
   pdf.setLineWidth(0.2);
 }
@@ -564,37 +564,39 @@ function drawEdgingSquare(
   ) {
     return;
   }
+
   const [x1, y1] = toPdfPoint(p1, startX, startY, scale);
-const [x2, y2] = toPdfPoint(p2, startX, startY, scale);
-if (
-  !Number.isFinite(x1) ||
-  !Number.isFinite(y1) ||
-  !Number.isFinite(x2) ||
-  !Number.isFinite(y2)
-) {
-  return;
-}
-const mx = (x1 + x2) / 2;
-const my = (y1 + y2) / 2;
-const size = 5;
-const rx = mx - size / 2;
-const ry = my - size / 2;
-if (
-  !Number.isFinite(rx) ||
-  !Number.isFinite(ry)
-) {
-  return;
-}
+  const [x2, y2] = toPdfPoint(p2, startX, startY, scale);
+
+  if (
+    !Number.isFinite(x1) ||
+    !Number.isFinite(y1) ||
+    !Number.isFinite(x2) ||
+    !Number.isFinite(y2)
+  ) {
+    return;
+  }
+
 const filled = Boolean(board.edging?.[edgeKey]);
-pdf.setLineWidth(0.35);
-if (filled) {
-  pdf.setFillColor(0, 0, 0);
-  pdf.rect(rx, ry, size, size, 'F');
+
+if (!filled) {
+  pdf.setLineWidth(0.35);
+  pdf.setDrawColor(0, 0, 0);       // zwykła krawędź — czarna
 } else {
-  pdf.rect(rx, ry, size, size);
-}
+  pdf.setLineWidth(1.40);
+  pdf.setDrawColor(255, 0, 0);     // okleina — czerwona
 }
 
+pdf.line(
+  x1,
+  y1,
+  x2,
+  y2
+);
+
+// wracamy do czarnego koloru
+pdf.setDrawColor(0, 0, 0);
+}
 
 
 function getFirstExistingEdgingKey(board: any, keys: string[]) {
@@ -1195,8 +1197,8 @@ function printSelectedBoardsToPdf() {
 
 drawGrainDirection(pdf, board, points, startX, startY, scale);
 drawShape(pdf, points, startX, startY, scale, board);
-drawEdgingSquares(pdf, board, startX, startY, scale);
 drawTechnicalDimensions(pdf, board, points, startX, startY, scale);
+drawEdgingSquares(pdf, board, startX, startY, scale);
   });
   pdf.save('formatki-do-druku.pdf');
 }
