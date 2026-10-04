@@ -210,6 +210,7 @@ function drawDim(
   const bx = x2 + ox;
   const by = y2 + oy;
 
+  pdf.setDrawColor(0);
   pdf.setLineWidth(0.2);
 
   // linie pomocnicze
@@ -219,25 +220,69 @@ function drawDim(
   // linia wymiarowa
   pdf.line(ax, ay, bx, by);
 
-  // znaczniki końców
-  pdf.line(ax - 2, ay - 2, ax + 2, ay + 2);
-  pdf.line(bx - 2, by - 2, bx + 2, by + 2);
+  // znaczniki
+  const tick = 2;
 
-  pdf.setFontSize(13.5);
+  pdf.line(
+    ax - tick,
+    ay - tick,
+    ax + tick,
+    ay + tick
+  );
 
-const tx = (ax + bx) / 2;
-const ty = (ay + by) / 2;
+  pdf.line(
+    bx - tick,
+    by - tick,
+    bx + tick,
+    by + tick
+  );
 
-const isVertical = Math.abs(by - ay) > Math.abs(bx - ax);
+  // =====================================================
+  // TEKST
+  // =====================================================
 
-if (isVertical) {
-  pdf.text(text, tx - 2, ty + pdf.getTextWidth(text) / 2, {
-    angle: 90
-  });
-} else {
-  pdf.text(text, tx - pdf.getTextWidth(text) / 2, ty - 2);
+  pdf.setFontSize(10);
+
+  const tx = (ax + bx) / 2;
+  const ty = (ay + by) / 2;
+
+  const isVertical =
+    Math.abs(by - ay) > Math.abs(bx - ax);
+
+  // tekst blisko linii, ale nigdy na niej
+  const textGap = 1.8;
+
+  if (isVertical) {
+  pdf.text(
+    text,
+    tx + 2.5,
+    ty,
+    {
+      angle: 90,
+      align: 'center',
+      baseline: 'middle'
+    }
+  );
 }
+
+ else {
+    pdf.text(
+      text,
+      tx,
+      ty - textGap,
+      {
+        align: 'center'
+      }
+    );
+  }
+
+  pdf.setDrawColor(0);
 }
+
+
+
+
+
 
 function drawRectHole(
   pdf: jsPDF,
@@ -334,143 +379,146 @@ function drawHoleWithDimensions(
     drawDim(pdf, [x + w, 0], [x + w, y], `${y}`, startX, startY, scale, -10);
   }
 
-  // =========================================================
-  // RECT_DOUBLE_CUTOUT — OTWÓR 1
-  // =========================================================
 
-  if (board.shape === 'RECT_DOUBLE_CUTOUT') {
-    const y1 = Number(d.hole1OffsetLength);
-    const x1 = Number(d.hole1OffsetWidth);
-    const h1 = Number(d.hole1Height);
-    const w1 = Number(d.hole1Width);
+if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+  const d = board.dimensions;
 
-    drawRectHole(
-      pdf,
-      x1,
-      y1,
-      w1,
-      h1,
-      startX,
-      startY,
-      scale
-    );
+  const x1 = Number(d.hole1OffsetWidth);
+  const y1 = Number(d.hole1OffsetLength);
+  const w1 = Number(d.hole1Width);
+  const h1 = Number(d.hole1Height);
 
-    // szerokość otworu 1
-    drawDim(
-      pdf,
-      [x1, y1 + h1],
-      [x1 + w1, y1 + h1],
-      `${w1}`,
-      startX,
-      startY,
-      scale,
-      -8
-    );
+  const x2 = Number(d.hole2OffsetWidth);
+  const y2 = Number(d.hole2OffsetLength);
+  const w2 = Number(d.hole2Width);
+  const h2 = Number(d.hole2Height);
 
-    // wysokość otworu 1
-    drawDim(
-      pdf,
-      [x1 + w1, y1],
-      [x1 + w1, y1 + h1],
-      `${h1}`,
-      startX,
-      startY,
-      scale,
-      8
-    );
+  // =====================================================
+  // OTWÓR 1
+  // =====================================================
 
-    // położenie otworu 1 od lewej
-    drawDim(
-      pdf,
-      [0, y1],
-      [x1, y1],
-      `${x1}`,
-      startX,
-      startY,
-      scale,
-      10
-    );
+  drawRectHole(
+    pdf,
+    x1,
+    y1,
+    w1,
+    h1,
+    startX,
+    startY,
+    scale
+  );
 
-    // położenie otworu 1 od dołu
-    drawDim(
-      pdf,
-      [x1 + w1, 0],
-      [x1 + w1, y1],
-      `${y1}`,
-      startX,
-      startY,
-      scale,
-      -10
-    );
+  // szerokość otworu 1 — nad otworem
+  drawDim(
+    pdf,
+    [x1, y1 + h1],
+    [x1 + w1, y1 + h1],
+    `${w1}`,
+    startX,
+    startY,
+    scale,
+    5
+  );
 
-    // =========================================================
-    // OTWÓR 2
-    // =========================================================
+  // wysokość otworu 1 — prawa strona
+  drawDim(
+    pdf,
+    [x1 + w1, y1],
+    [x1 + w1, y1 + h1],
+    `${h1}`,
+    startX,
+    startY,
+    scale,
+    -5
+  );
 
-    const y2 = Number(d.hole2OffsetLength);
-    const x2 = Number(d.hole2OffsetWidth);
-    const h2 = Number(d.hole2Height);
-    const w2 = Number(d.hole2Width);
+  // położenie X — z lewej
+  drawDim(
+    pdf,
+    [0, y1],
+    [x1, y1],
+    `${x1}`,
+    startX,
+    startY,
+    scale,
+    -5
+  );
 
-    drawRectHole(
-      pdf,
-      x2,
-      y2,
-      w2,
-      h2,
-      startX,
-      startY,
-      scale
-    );
+  // położenie Y — od dołu
+  drawDim(
+    pdf,
+    [x1 + w1, 0],
+    [x1 + w1, y1],
+    `${y1}`,
+    startX,
+    startY,
+    scale,
+    40
+  );
 
-    // szerokość otworu 2
-    drawDim(
-      pdf,
-      [x2, y2 + h2],
-      [x2 + w2, y2 + h2],
-      `${w2}`,
-      startX,
-      startY,
-      scale,
-      -8
-    );
+  // =====================================================
+  // OTWÓR 2
+  // =====================================================
 
-    // wysokość otworu 2
-    drawDim(
-      pdf,
-      [x2 + w2, y2],
-      [x2 + w2, y2 + h2],
-      `${h2}`,
-      startX,
-      startY,
-      scale,
-      8
-    );
+  drawRectHole(
+    pdf,
+    x2,
+    y2,
+    w2,
+    h2,
+    startX,
+    startY,
+    scale
+  );
 
-    // położenie otworu 2 od lewej
-    drawDim(
-      pdf,
-      [0, y2],
-      [x2, y2],
-      `${x2}`,
-      startX,
-      startY,
-      scale,
-      10
-    );
+  // szerokość otworu 2
+  drawDim(
+    pdf,
+    [x2, y2 + h2],
+    [x2 + w2, y2 + h2],
+    `${w2}`,
+    startX,
+    startY,
+    scale,
+    5
+  );
 
-    // położenie otworu 2 od dołu
-    drawDim(
-      pdf,
-      [x2 + w2, 0],
-      [x2 + w2, y2],
-      `${y2}`,
-      startX,
-      startY,
-      scale,
-      -10
-    );
-  }
+  // wysokość otworu 2
+  drawDim(
+    pdf,
+    [x2 + w2, y2],
+    [x2 + w2, y2 + h2],
+    `${h2}`,
+    startX,
+    startY,
+    scale,
+    -5
+  );
+
+  // położenie X — dalej na zewnątrz
+  drawDim(
+    pdf,
+    [0, y2],
+    [x2, y2],
+    `${x2}`,
+    startX,
+    startY,
+    scale,
+    -5
+  );
+
+  // położenie Y — dalej na zewnątrz
+  drawDim(
+    pdf,
+    [x2 + w2, 0],
+    [x2 + w2, y2],
+    `${y2}`,
+    startX,
+    startY,
+    scale,
+    30
+  );
+}
 }
 
 function drawTechnicalDimensions(
@@ -484,29 +532,182 @@ function drawTechnicalDimensions(
   const d = board.dimensions;
   const b = getBounds(points);
 
-  // wymiar poziomy dół
+// =========================================================
+// WYMIARY ZEWNĘTRZNE
+// =========================================================
+
+// szerokość całkowita — najbliżej formatki
+drawDim(
+  pdf,
+  [b.minX, b.minY],
+  [b.maxX, b.minY],
+  `${Math.round(b.width)}`,
+  startX,
+  startY,
+  scale,
+  30
+);
+
+// wysokość całkowita — na zewnątrz po lewej
+drawDim(
+  pdf,
+  [b.minX, b.minY],
+  [b.minX, b.maxY],
+  `${Math.round(b.height)}`,
+  startX,
+  startY,
+  scale,
+  -30
+);
+
+
+if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+  const d = board.dimensions;
+
+  // =====================================================
+  // ZASADA:
+  // 10 mm  — pierwszy poziom
+  // 20 mm  — drugi
+  // 30 mm  — trzeci
+  // 40 mm  — czwarty
+  // =====================================================
+
+  const D1 = 10;
+  const D2 = 20;
+  const D3 = 30;
+  const D4 = 40;
+
+  // =====================================================
+  // GÓRA — szerokość górnego odcinka
+  // =====================================================
+
   drawDim(
     pdf,
-    [b.minX, b.minY],
-    [b.maxX, b.minY],
-    `${Math.round(b.width)}`,
+    [d.width1, d.length],
+    [d.width, d.length],
+    `${Math.round(d.width - d.width1)}`,
     startX,
     startY,
     scale,
-    14
+    -D2
   );
 
-  // wymiar pionowy lewy — tylko raz
+  // =====================================================
+  // DÓŁ — szerokość dolnego odcinka
+  // =====================================================
+
   drawDim(
     pdf,
-    [b.minX, b.minY],
-    [b.minX, b.maxY],
-    `${Math.round(b.height)}`,
+    [d.width2, 0],
+    [d.width, 0],
+    `${Math.round(d.width - d.width2)}`,
     startX,
     startY,
     scale,
-    -18
+    D2
   );
+
+
+
+// =====================================================
+// LEWA STRONA
+// 1900 bliżej formatki
+// 2000 dalej
+// =====================================================
+
+drawDim(
+  pdf,
+  [0, d.length2],
+  [0, d.length - d.length1],
+  `${Math.round(
+    d.length - d.length1 - d.length2
+  )}`,
+  startX,
+  startY,
+  scale,
+  -20
+);
+
+
+
+// =====================================================
+// PRAWA STRONA
+// 100 bliżej formatki
+// 1400 dalej
+// =====================================================
+
+// 100 — dolny odcinek
+drawDim(
+  pdf,
+  [d.width2, 0],
+  [d.width2, d.length2],
+  `${Math.round(d.length2)}`,
+  startX,
+  startY,
+  scale,
+  10
+);
+
+  // =====================================================
+  // ŚCIĘCIE GÓRNE
+  // =====================================================
+
+  drawDim(
+    pdf,
+    [d.width1, d.length],
+    [0, d.length - d.length1],
+    `${Math.round(
+      Math.hypot(
+        d.width1,
+        d.length1
+      )
+    )}`,
+    startX,
+    startY,
+    scale,
+    D4
+  );
+
+  // =====================================================
+  // ŚCIĘCIE DOLNE
+  // =====================================================
+
+  drawDim(
+    pdf,
+    [0, d.length2],
+    [d.width2, 0],
+    `${Math.round(
+      Math.hypot(
+        d.width2,
+        d.length2
+      )
+    )}`,
+    startX,
+    startY,
+    scale,
+    D4
+  );
+
+
+  // =====================================================
+  // OTWORY
+  // =====================================================
+
+  drawHoleWithDimensions(
+    pdf,
+    board,
+    startX,
+    startY,
+    scale
+  );
+}
+
+
+
+
+
+
+
 
 if (board.shape === 'RECT_CUT_CORNER') {
   // szerokość górnego odcinka
@@ -540,7 +741,7 @@ if (board.shape === 'RECT_CORNER_NOTCH') {
     drawDim(pdf, [d.width - d.rightInset, d.height], [d.width, d.height], `${d.rightInset}`, startX, startY, scale, -12);
   }
 
-  drawHoleWithDimensions(pdf, board, startX, startY, scale);
+//  drawHoleWithDimensions(pdf, board, startX, startY, scale);
 }
 
 
@@ -1181,8 +1382,25 @@ function printSelectedBoardsToPdf() {
       maxDrawW / Math.max(bounds.width, 1),
       maxDrawH / Math.max(bounds.height, 1)
     );
-    const startX = 45;
-    const startY = 240;
+// =========================================================
+// CENTROWANIE FORMATKI NA A4
+// =========================================================
+
+const pageW = 210;
+const pageH = 297;
+
+const drawW = bounds.width * scale;
+const drawH = bounds.height * scale;
+
+// środek formatki = środek kartki
+const startX =
+  (pageW - drawW) / 2 -
+  bounds.minX * scale;
+
+const startY =
+  (pageH + drawH) / 2 +
+  bounds.minY * scale;
+    
     pdf.setFontSize(22);
     pdf.text(board.number, 15, 22);
 //    if (board.shape !== 'RECT') {
