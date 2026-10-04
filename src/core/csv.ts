@@ -18,6 +18,16 @@ function getLength(board: BoardItem) {
     case 'RECT_CUT_CORNER':
     case 'RECT_CORNER_NOTCH':
       return Number(d.length1 ?? 0);
+
+case 'RECT_DOUBLE_CUTOUT':
+  return Math.max(
+    Number(d.length ?? 0),
+    Number(d.length ?? 0) - Number(d.length1 ?? 0) - Number(d.length2 ?? 0), 
+Number(d.length ?? 0) - Number(d.length1 ?? 0),
+Number(d.length ?? 0) - Number(d.length2 ?? 0)
+
+  );
+
     case 'RIGHT_TRAPEZOID':
       return Number(Math.max(d.lengthLeft ?? 0, d.lengthRight ?? 0));
     case 'TRAPEZOID':
@@ -39,6 +49,15 @@ function getWidth(board: BoardItem) {
     case 'RECT_CUT_CORNER':
     case 'RECT_CORNER_NOTCH':
       return Number(d.width1 ?? 0);
+
+case 'RECT_DOUBLE_CUTOUT':
+  return Math.max(
+    Number(d.width ?? 0),
+    Number(d.width ?? 0),
+    Number(d.width ?? 0)
+  );
+
+
     case 'RIGHT_TRAPEZOID':
       return Number(d.width ?? 0);
     case 'TRAPEZOID':
@@ -50,11 +69,47 @@ function getWidth(board: BoardItem) {
 }
 
 function countLengthEdging(board: BoardItem) {
-  return Number(Boolean(board.edging.lengthLeft)) + Number(Boolean(board.edging.lengthRight));
+  if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+    return [
+      'doubleRight',
+      'doubleLeft',
+      'otwór1Lewo',
+      'otwór1Prawo',
+      'otwór2Lewo',
+      'otwór2Prawo'
+    ].reduce(
+      (sum, key) => sum + Number(Boolean((board.edging as any)[key])),
+      0
+    );
+  }
+
+  return (
+    Number(Boolean(board.edging.lengthLeft)) +
+    Number(Boolean(board.edging.lengthRight))
+  );
 }
 
 function countWidthEdging(board: BoardItem) {
-  return Number(Boolean(board.edging.widthTop)) + Number(Boolean(board.edging.widthBottom));
+  if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+    return [
+      'doubleBottom',
+      'doubleTop',
+      'cut1',
+      'cut2',
+      'otwór1Dół',
+      'otwór1Góra',
+      'otwór2Dół',
+      'otwór2Góra'
+    ].reduce(
+      (sum, key) => sum + Number(Boolean((board.edging as any)[key])),
+      0
+    );
+  }
+
+  return (
+    Number(Boolean(board.edging.widthTop)) +
+    Number(Boolean(board.edging.widthBottom))
+  );
 }
 
 function getFamily(role: BoardItem['role']): 'korpus' | 'front' | 'blat' | 'hdf' | 'inne' {
@@ -77,7 +132,8 @@ export function boardsToCsv(boards: BoardItem[], materials: ProjectMaterialPalet
     'Długość',
     'Ilość oklejonych boków długości',
     'Szerokość',
-    'Ilość oklejonych boków szerokości'
+    'Ilość oklejonych boków szerokości',
+'Uwagi'
   ];
 
   const rows = boards.map((board, index) => {
@@ -110,7 +166,8 @@ board.grainDirection === 'horizontal'
   : getWidth(board),
 board.grainDirection === 'horizontal'
   ? countLengthEdging(board)
-  : countWidthEdging(board)
+  : countWidthEdging(board),
+board.uwagi ?? ''
     ];
   });
 

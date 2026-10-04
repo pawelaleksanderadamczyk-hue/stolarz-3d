@@ -286,6 +286,8 @@ clearMeasurements: () =>
     project.nextCounters.RECT_CUT_CORNER = next;
     project.nextCounters.RECT_CORNER_NOTCH = next;
     project.nextCounters.RECT_INNER_CUTOUT = next;
+    project.nextCounters.RECT_DOUBLE_CUTOUT = next;
+
 
     const board = createBoard(project, {
       shape,

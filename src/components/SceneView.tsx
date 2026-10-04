@@ -139,6 +139,147 @@ function getSegments(board: BoardItem): Segment[] {
       ];
 
 
+case 'RECT_DOUBLE_CUTOUT':
+  return [
+// DÓŁ
+{
+  key: 'doubleBottom',
+  start: [d.width2, 0],
+  end: [d.width, 0]
+},
+
+// PRAWA
+{
+  key: 'doubleRight',
+  start: [d.width, 0],
+  end: [d.width, d.length]
+},
+
+// GÓRA
+{
+  key: 'doubleTop',
+  start: [d.width, d.length],
+  end: [d.width1, d.length]
+},
+
+// LEWE GÓRNE ŚCIĘCIE
+{
+  key: 'cut2',
+  start: [d.width1, d.length],
+  end: [0, d.length - d.length1]
+},
+
+// LEWA
+{
+  key: 'doubleLeft',
+  start: [0, d.length - d.length1],
+  end: [0, d.length2]
+},
+
+// LEWE DOLNE ŚCIĘCIE
+{
+  key: 'cut1',
+  start: [0, d.length2],
+  end: [d.width2, 0]
+},
+
+
+    // OTWÓR 1
+    {
+      key: 'otwór1Dół',
+      start: [d.hole1OffsetWidth, d.hole1OffsetLength],
+      end: [
+        d.hole1OffsetWidth + d.hole1Width,
+        d.hole1OffsetLength
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór1Prawo',
+      start: [
+        d.hole1OffsetWidth + d.hole1Width,
+        d.hole1OffsetLength
+      ],
+      end: [
+        d.hole1OffsetWidth + d.hole1Width,
+        d.hole1OffsetLength + d.hole1Height
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór1Góra',
+      start: [
+        d.hole1OffsetWidth + d.hole1Width,
+        d.hole1OffsetLength + d.hole1Height
+      ],
+      end: [
+        d.hole1OffsetWidth,
+        d.hole1OffsetLength + d.hole1Height
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór1Lewo',
+      start: [
+        d.hole1OffsetWidth,
+        d.hole1OffsetLength + d.hole1Height
+      ],
+      end: [
+        d.hole1OffsetWidth,
+        d.hole1OffsetLength
+      ],
+      hole: true
+    },
+
+    // OTWÓR 2
+    {
+      key: 'otwór2Dół',
+      start: [d.hole2OffsetWidth, d.hole2OffsetLength],
+      end: [
+        d.hole2OffsetWidth + d.hole2Width,
+        d.hole2OffsetLength
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór2Prawo',
+      start: [
+        d.hole2OffsetWidth + d.hole2Width,
+        d.hole2OffsetLength
+      ],
+      end: [
+        d.hole2OffsetWidth + d.hole2Width,
+        d.hole2OffsetLength + d.hole2Height
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór2Góra',
+      start: [
+        d.hole2OffsetWidth + d.hole2Width,
+        d.hole2OffsetLength + d.hole2Height
+      ],
+      end: [
+        d.hole2OffsetWidth,
+        d.hole2OffsetLength + d.hole2Height
+      ],
+      hole: true
+    },
+    {
+      key: 'otwór2Lewo',
+      start: [
+        d.hole2OffsetWidth,
+        d.hole2OffsetLength + d.hole2Height
+      ],
+      end: [
+        d.hole2OffsetWidth,
+        d.hole2OffsetLength
+      ],
+      hole: true
+    }
+  ];
+
+
 case 'RIGHT_TRAPEZOID': {
   const d: any = board.dimensions;
   return [
@@ -279,10 +420,34 @@ edgingTexture.needsUpdate = true;
         if (seg.key === 'notchVertical') { nx = 0; ny = -1; }
         if (seg.key === 'notchHorizontal') { nx = -1; ny = 0; }
 
-        if (seg.key === 'otwórDół') { nx = 0; ny = 1; }
-        if (seg.key === 'otwórGóra') { nx = 0; ny = -1; }
-        if (seg.key === 'otwórLewo') { nx = 1; ny = 0; }
-        if (seg.key === 'otwórPrawo') { nx = -1; ny = 0; }
+if (seg.key === 'cut1') {
+  // kierunek na zewnątrz prawego skosu
+  nx = dy / len;
+  ny = -dx / len;
+}
+
+if (seg.key === 'cut2') {
+  // kierunek na zewnątrz lewego skosu
+  nx = dy / len;
+  ny = -dx / len;
+}
+
+
+
+if (seg.key === 'otwórDół') { nx = 0; ny = 1; }
+if (seg.key === 'otwórGóra') { nx = 0; ny = -1; }
+if (seg.key === 'otwórLewo') { nx = 1; ny = 0; }
+if (seg.key === 'otwórPrawo') { nx = -1; ny = 0; }
+
+if (seg.key === 'otwór1Dół') { nx = 0; ny = 1; }
+if (seg.key === 'otwór1Góra') { nx = 0; ny = -1; }
+if (seg.key === 'otwór1Lewo') { nx = 1; ny = 0; }
+if (seg.key === 'otwór1Prawo') { nx = -1; ny = 0; }
+
+if (seg.key === 'otwór2Dół') { nx = 0; ny = 1; }
+if (seg.key === 'otwór2Góra') { nx = 0; ny = -1; }
+if (seg.key === 'otwór2Lewo') { nx = 1; ny = 0; }
+if (seg.key === 'otwór2Prawo') { nx = -1; ny = 0; }
 
         const dir = seg.hole ? -1 : 1;
         const isTrapezoid =

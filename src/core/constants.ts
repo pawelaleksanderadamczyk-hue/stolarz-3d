@@ -81,6 +81,7 @@ export const SHAPE_LABELS: Record<ShapeType, string> = {
   RECT_CUT_CORNER: 'Prostokąt ze ściętym rogiem',
   RECT_CORNER_NOTCH: 'Prostokąt z wyciętym prostokątem w narożu',
   RECT_INNER_CUTOUT: 'Prostokąt z wyciętym prostokątem wewnątrz',
+  RECT_DOUBLE_CUTOUT: 'Prostokąt z dwoma wycięciami wewnątrz',
   RIGHT_TRAPEZOID: 'Trapez prostokątny',
   TRAPEZOID: 'Trapez klasyczny',
   TRAPEZOID_INNER_CUTOUT: 'Trapez z wyciętym prostokątem wewnątrz'
@@ -91,6 +92,7 @@ export const SHAPE_CODES: Record<ShapeType, string> = {
   RECT_CUT_CORNER: 'PR/S',
   RECT_CORNER_NOTCH: 'PR/WPR',
   RECT_INNER_CUTOUT: 'PR/OPR',
+  RECT_DOUBLE_CUTOUT: 'PR/2OPR',
   RIGHT_TRAPEZOID: 'TP',
   TRAPEZOID: 'TR',
   TRAPEZOID_INNER_CUTOUT: 'TR/OPR'
@@ -101,36 +103,136 @@ export const MATERIAL_OPTIONS = [
   // ===== TEKSTURY =====
 
   {
-    id: 'dab-kamienny',
-    name: 'Dąb Kamienny',
+    id: '5527-Dąb-Kamienny',
+    name: '5527 Dąb Kamienny',
     type: 'texture',
     texture: '/textures/Dąb_Kamienny.jpg',
     hasGrain: true
   },
 
   {
-    id: 'dab-zloty',
-    name: 'Dąb Złoty',
+    id: 'K003-Dąb-Złoty',
+    name: 'K003 Dąb Złoty',
     type: 'texture',
     texture: '/textures/Dąb_Złoty.jpg',
     hasGrain: true
   },
 
   {
-    id: 'dab-sonoma',
-    name: 'Dąb Sonoma',
+    id: '3025-Dąb-Sonoma',
+    name: '3025 Dąb Sonoma',
     type: 'texture',
     texture: '/textures/Dąb_Sonoma.png',
     hasGrain: true
   },
 
   {
-    id: 'dab-czekoladowy',
-    name: 'Dąb Czekoladowy',
+    id: 'K554-Dąb-Czekoladowy',
+    name: 'K554 Dąb Czekoladowy',
     type: 'texture',
     texture: '/textures/Dąb_Czekoladowy.jpg',
     hasGrain: true
   },
+
+  {
+    id: '0854-Wenge',
+    name: '0854 Wenge',
+    type: 'texture',
+    texture: '/textures/0854_Wenge.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: '4298-Light-Atelier',
+    name: '4298 Light Atelier',
+    type: 'texture',
+    texture: '/textures/4298_Light_Atelier.jpg',
+    hasGrain: true
+  },
+
+  {
+    id: 'K365-Coast-Evoke-Oak',
+    name: 'K365 Coast Evoke Oak',
+    type: 'texture',
+    texture: '/textures/K365_Coast_Evoke_Oak.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: 'K544-Hazel-Silverjack-Oak',
+    name: 'K544 Hazel Silverjack Oak',
+    type: 'texture',
+    texture: '/textures/K544_Hazel_Silverjack_Oak.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: 'K354-Colonial-Grange-Oak',
+    name: 'K354 Colonial Grange Oak',
+    type: 'texture',
+    texture: '/textures/K354_Colonial_Grange_Oak.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: 'K535-RW-Gold-Baroque-Oak',
+    name: 'K535 RW Gold Baroque Oak',
+    type: 'texture',
+    texture: '/textures/K535_RW_Gold_Baroque_Oak.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: 'K351-RT-Beton-Rdzawy',
+    name: 'K351 RT Beton Rdzawy',
+    type: 'texture',
+    texture: '/textures/K351_RT_Beton_Rdzawy.png',
+    hasGrain: true
+  },
+
+ {
+    id: 'K023-Venato',
+    name: 'K023 Venato',
+    type: 'texture',
+    texture: '/textures/K023_Venato.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: '8685-BS-Biel-Alpejska',
+    name: '8685 BS Biel Alpejska',
+    type: 'texture',
+    texture: '/textures/K8685_Biel_Alpejska.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: '8681-SM-Biały-Brylantowy',
+    name: '8681 SM Biały Brylantowy',
+    type: 'texture',
+    texture: '/textures/8681_SM_Biały_Brylantowy.jpg',
+    hasGrain: true
+  },
+
+ {
+    id: '0375-Maple',
+    name: '0375 Maple',
+    type: 'texture',
+    texture: '/textures/0375_Maple.jpg',
+    hasGrain: true
+  },
+
+
+
+
+
+
+
+
+
+
+
+
 
   {
     id: 'kaszmir',
@@ -147,6 +249,21 @@ export const MATERIAL_OPTIONS = [
     texture: '/textures/Kremowy.jpg',
     hasGrain: false
   },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // ===== KOLORY =====
 

@@ -25,12 +25,13 @@ function createId() {
 export function createEmptyProject(): ProjectData {
   return {
     version: 1,
-    nextCounters: {
-      RECT: 1,
-      RECT_CUT_CORNER: 1,
-      RECT_CORNER_NOTCH: 1,
-      RECT_INNER_CUTOUT: 1,
-	RIGHT_TRAPEZOID: 1,
+nextCounters: {
+  RECT: 1,
+  RECT_CUT_CORNER: 1,
+  RECT_CORNER_NOTCH: 1,
+  RECT_INNER_CUTOUT: 1,
+  RECT_DOUBLE_CUTOUT: 1,
+  RIGHT_TRAPEZOID: 1,
 	TRAPEZOID: 1,
 	TRAPEZOID_INNER_CUTOUT: 1
     },
@@ -68,6 +69,33 @@ export function createDefaultDimensions(shape: ShapeType): ShapeDimensions {
         cutoutWidth: 100,
         thickness: 18
       };
+
+
+case 'RECT_DOUBLE_CUTOUT':
+  return {
+    length: 800,
+    width: 400,
+
+    width1: 100,
+    length1: 100,
+
+    width2: 100,
+    length2: 100,
+
+    hole1Width: 200,
+    hole1Height: 200,
+    hole1OffsetWidth: 100,
+    hole1OffsetLength: 500,
+
+    hole2Width: 200,
+    hole2Height: 200,
+    hole2OffsetWidth: 100,
+    hole2OffsetLength: 100,
+
+    thickness: 18
+  };
+
+
 case 'RIGHT_TRAPEZOID':
   return {
     lengthLeft: 800,
@@ -126,24 +154,53 @@ cabinetName: '',
       edgingIndex: form.edgingIndex as MaterialIndex
     },
     dimensions: form.dimensions,
-    plane: 'YZ',
-    anchor: { ...project.globalAnchor },
-    rotation: { x: 0, y: 0, z: 0 },
-    rotationQuaternion: identityQuaternion(),
-    edging: {
-      lengthRight: false,
-      lengthLeft: false,
-      widthTop: false,
-      widthBottom: false,
-      cut: false,
-      notchHorizontal: false,
-      notchVertical: false,
-      otwórGóra: false,
-      otwórDół: false,
-      otwórLewo: false,
-      otwórPrawo: false
-    }
-  };
+plane: 'YZ',
+anchor: { ...project.globalAnchor },
+
+rotation:
+  form.shape === 'RECT_DOUBLE_CUTOUT'
+    ? { x: -90, y: 0, z: 0 }
+    : { x: 0, y: 0, z: 0 },
+
+rotationQuaternion:
+  form.shape === 'RECT_DOUBLE_CUTOUT'
+    ? quaternionFromRotation({ x: -90, y: 0, z: 0 })
+    : identityQuaternion(),
+
+
+edging: {
+  lengthRight: false,
+  lengthLeft: false,
+  widthTop: false,
+  widthBottom: false,
+
+  doubleBottom: false,
+  doubleRight: false,
+  doubleTop: false,
+  doubleLeft: false,
+
+  cut: false,
+  cut1: false,
+  cut2: false,
+
+  notchHorizontal: false,
+  notchVertical: false,
+
+  otwórGóra: false,
+  otwórDół: false,
+  otwórLewo: false,
+  otwórPrawo: false,
+
+  otwór1Dół: false,
+  otwór1Góra: false,
+  otwór1Lewo: false,
+  otwór1Prawo: false,
+
+  otwór2Dół: false,
+  otwór2Góra: false,
+  otwór2Lewo: false,
+  otwór2Prawo: false
+}  };
 }
 
 export function roundNearZero(value: number) {
@@ -185,6 +242,18 @@ export function getOuterPolygon2D(board: BoardItem): Array<{ x: number; y: numbe
         { x: d.length, y: d.width },
         { x: 0, y: d.width }
       ];
+
+
+case 'RECT_DOUBLE_CUTOUT':
+  return [
+    { x: d.width2, y: 0 },
+    { x: d.width, y: 0 },
+    { x: d.width, y: d.length },
+    { x: d.width1, y: d.length },
+    { x: 0, y: d.length-d.length1 },
+    { x: 0, y: d.length2 }
+  ];
+
 
 case 'RIGHT_TRAPEZOID': {
   const d: any = board.dimensions;

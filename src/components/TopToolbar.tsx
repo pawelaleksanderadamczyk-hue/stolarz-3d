@@ -50,6 +50,29 @@ case 'RECT_CUT_CORNER':
         [0, d.length1]
       ];
 
+
+
+case 'RECT_DOUBLE_CUTOUT':
+  return [
+    // LEWY DÓŁ — początek po ścięciu
+    [d.width2, 0],
+
+    // PRAWY DÓŁ
+    [d.width, 0],
+
+    // PRAWY GÓRA
+    [d.width, d.length],
+
+    // LEWY GÓRA — początek górnego ścięcia
+    [d.width1, d.length],
+
+    // LEWA — koniec górnego ścięcia
+    [0, d.length - d.length1],
+
+    // LEWA — koniec dolnego odcinka
+    [0, d.length2]
+  ];
+
     case 'RIGHT_TRAPEZOID':
       return [
         [0, 0],
@@ -103,19 +126,61 @@ function toPdfPoint(
   ];
 }
 
-function drawShape(pdf: jsPDF, points: PdfPoint[], startX: number, startY: number, scale: number) {
+function drawShape(
+  pdf: jsPDF,
+  points: PdfPoint[],
+  startX: number,
+  startY: number,
+  scale: number,
+  board?: any
+) {
   pdf.setLineWidth(1.05);
 
+  // OBWÓD ZEWNĘTRZNY
   points.forEach((p, index) => {
     const [x, y] = toPdfPoint(p, startX, startY, scale);
 
-    if (index === 0) pdf.moveTo(x, y);
-    else pdf.lineTo(x, y);
+    if (index === 0) {
+      pdf.moveTo(x, y);
+    } else {
+      pdf.lineTo(x, y);
+    }
   });
 
   pdf.close();
   pdf.stroke();
+
+  // OTWORY
+  if (board?.shape === 'RECT_DOUBLE_CUTOUT') {
+    const d = board.dimensions;
+
+drawRectHole(
+  pdf,
+  Number(d.hole1OffsetWidth),
+  Number(d.hole1OffsetLength),
+  Number(d.hole1Width),
+  Number(d.hole1Height),
+      startX,
+      startY,
+      scale
+    );
+
+drawRectHole(
+  pdf,
+  Number(d.hole2OffsetWidth),
+  Number(d.hole2OffsetLength),
+  Number(d.hole2Width),
+  Number(d.hole2Height),
+      startX,
+      startY,
+      scale
+    );
+  }
 }
+
+
+
+
 
 function drawDim(
   pdf: jsPDF,
@@ -190,10 +255,72 @@ function drawRectHole(
   pdf.setLineWidth(0.2);
 }
 
-function drawHoleWithDimensions(pdf: jsPDF, board: any, startX: number, startY: number, scale: number) {
+
+
+
+function drawHoleWithDimensions(
+  pdf: jsPDF,
+  board: any,
+  startX: number,
+  startY: number,
+  scale: number
+) {
   const d = board.dimensions;
 
   if (board.shape === 'RECT_INNER_CUTOUT') {
+    const x = d.cutoutOffsetWidth;
+    const y = d.cutoutOffsetLength;
+    const w = d.cutoutWidth;
+    const h = d.cutoutLength;
+
+    drawRectHole(pdf, x, y, w, h, startX, startY, scale);
+
+    drawDim(
+      pdf,
+      [x, y + h],
+      [x + w, y + h],
+      `${w}`,
+      startX,
+      startY,
+      scale,
+      -8
+    );
+
+    drawDim(
+      pdf,
+      [x + w, y],
+      [x + w, y + h],
+      `${h}`,
+      startX,
+      startY,
+      scale,
+      8
+    );
+
+    drawDim(
+      pdf,
+      [0, y],
+      [x, y],
+      `${x}`,
+      startX,
+      startY,
+      scale,
+      10
+    );
+
+    drawDim(
+      pdf,
+      [x + w, 0],
+      [x + w, y],
+      `${y}`,
+      startX,
+      startY,
+      scale,
+      -10
+    );
+  }
+
+  if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
     const x = d.cutoutOffsetWidth;
     const y = d.cutoutOffsetLength;
     const w = d.cutoutWidth;
@@ -207,18 +334,142 @@ function drawHoleWithDimensions(pdf: jsPDF, board: any, startX: number, startY: 
     drawDim(pdf, [x + w, 0], [x + w, y], `${y}`, startX, startY, scale, -10);
   }
 
-  if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
-    const x = d.cutoutOffsetWidth;
-const y = d.cutoutOffsetLength;
-const w = d.cutoutWidth;
-const h = d.cutoutLength;
+  // =========================================================
+  // RECT_DOUBLE_CUTOUT — OTWÓR 1
+  // =========================================================
 
-    drawRectHole(pdf, x, y, w, h, startX, startY, scale);
+  if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+    const y1 = Number(d.hole1OffsetLength);
+    const x1 = Number(d.hole1OffsetWidth);
+    const h1 = Number(d.hole1Height);
+    const w1 = Number(d.hole1Width);
 
-    drawDim(pdf, [x, y + h], [x + w, y + h], `${w}`, startX, startY, scale, -8);
-    drawDim(pdf, [x + w, y], [x + w, y + h], `${h}`, startX, startY, scale, 8);
-    drawDim(pdf, [0, y], [x, y], `${x}`, startX, startY, scale, 10);
-    drawDim(pdf, [x + w, 0], [x + w, y], `${y}`, startX, startY, scale, -10);
+    drawRectHole(
+      pdf,
+      x1,
+      y1,
+      w1,
+      h1,
+      startX,
+      startY,
+      scale
+    );
+
+    // szerokość otworu 1
+    drawDim(
+      pdf,
+      [x1, y1 + h1],
+      [x1 + w1, y1 + h1],
+      `${w1}`,
+      startX,
+      startY,
+      scale,
+      -8
+    );
+
+    // wysokość otworu 1
+    drawDim(
+      pdf,
+      [x1 + w1, y1],
+      [x1 + w1, y1 + h1],
+      `${h1}`,
+      startX,
+      startY,
+      scale,
+      8
+    );
+
+    // położenie otworu 1 od lewej
+    drawDim(
+      pdf,
+      [0, y1],
+      [x1, y1],
+      `${x1}`,
+      startX,
+      startY,
+      scale,
+      10
+    );
+
+    // położenie otworu 1 od dołu
+    drawDim(
+      pdf,
+      [x1 + w1, 0],
+      [x1 + w1, y1],
+      `${y1}`,
+      startX,
+      startY,
+      scale,
+      -10
+    );
+
+    // =========================================================
+    // OTWÓR 2
+    // =========================================================
+
+    const y2 = Number(d.hole2OffsetLength);
+    const x2 = Number(d.hole2OffsetWidth);
+    const h2 = Number(d.hole2Height);
+    const w2 = Number(d.hole2Width);
+
+    drawRectHole(
+      pdf,
+      x2,
+      y2,
+      w2,
+      h2,
+      startX,
+      startY,
+      scale
+    );
+
+    // szerokość otworu 2
+    drawDim(
+      pdf,
+      [x2, y2 + h2],
+      [x2 + w2, y2 + h2],
+      `${w2}`,
+      startX,
+      startY,
+      scale,
+      -8
+    );
+
+    // wysokość otworu 2
+    drawDim(
+      pdf,
+      [x2 + w2, y2],
+      [x2 + w2, y2 + h2],
+      `${h2}`,
+      startX,
+      startY,
+      scale,
+      8
+    );
+
+    // położenie otworu 2 od lewej
+    drawDim(
+      pdf,
+      [0, y2],
+      [x2, y2],
+      `${x2}`,
+      startX,
+      startY,
+      scale,
+      10
+    );
+
+    // położenie otworu 2 od dołu
+    drawDim(
+      pdf,
+      [x2 + w2, 0],
+      [x2 + w2, y2],
+      `${y2}`,
+      startX,
+      startY,
+      scale,
+      -10
+    );
   }
 }
 
@@ -271,6 +522,10 @@ if (board.shape === 'RECT_CORNER_NOTCH') {
   // druga wysokość po prawej
   drawDim(pdf, [d.width1, 0], [d.width1, d.length2], `${d.length2}`, startX, startY, scale, 22);
 }
+
+
+
+
 
   if (board.shape === 'RIGHT_TRAPEZOID') {
     // TP — bez drugiego 800, tylko prawa wysokość jeśli inna
@@ -412,6 +667,163 @@ if (board.shape === 'RECT_INNER_CUTOUT') {
     drawEdgingSquare(pdf, board, 'otwórPrawo', [x + w, y], [x + w, y + h], startX, startY, scale);
   }
 
+
+
+
+if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+
+  // DÓŁ
+  drawEdgingSquare(
+    pdf,
+    board,
+    'doubleBottom',
+    [d.width2, 0],
+    [d.width, 0],
+    startX,
+    startY,
+    scale
+  );
+
+  // PRAWA
+  drawEdgingSquare(
+    pdf,
+    board,
+    'doubleRight',
+    [d.width, 0],
+    [d.width, d.length],
+    startX,
+    startY,
+    scale
+  );
+
+  // GÓRA
+  drawEdgingSquare(
+    pdf,
+    board,
+    'doubleTop',
+    [d.width, d.length],
+    [d.width1, d.length],
+    startX,
+    startY,
+    scale
+  );
+
+  // LEWE GÓRNE ŚCIĘCIE
+  drawEdgingSquare(
+    pdf,
+    board,
+    'cut2',
+    [d.width1, d.length],
+    [0, d.length - d.length1],
+    startX,
+    startY,
+    scale
+  );
+
+  // LEWA
+  drawEdgingSquare(
+    pdf,
+    board,
+    'doubleLeft',
+    [0, d.length - d.length1],
+    [0, d.length2],
+    startX,
+    startY,
+    scale
+  );
+
+  // LEWE DOLNE ŚCIĘCIE
+  drawEdgingSquare(
+    pdf,
+    board,
+    'cut1',
+    [0, d.length2],
+    [d.width2, 0],
+    startX,
+    startY,
+    scale
+  );
+
+  // ==========================
+  // OTWÓR 1
+  // ==========================
+
+  const x1 = Number(d.hole1OffsetWidth);
+  const y1 = Number(d.hole1OffsetLength);
+  const w1 = Number(d.hole1Width);
+  const h1 = Number(d.hole1Height);
+
+  drawEdgingSquare(
+    pdf, board, 'otwór1Dół',
+    [x1, y1],
+    [x1 + w1, y1],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór1Góra',
+    [x1, y1 + h1],
+    [x1 + w1, y1 + h1],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór1Lewo',
+    [x1, y1],
+    [x1, y1 + h1],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór1Prawo',
+    [x1 + w1, y1],
+    [x1 + w1, y1 + h1],
+    startX, startY, scale
+  );
+
+  // ==========================
+  // OTWÓR 2
+  // ==========================
+
+  const x2 = Number(d.hole2OffsetWidth);
+  const y2 = Number(d.hole2OffsetLength);
+  const w2 = Number(d.hole2Width);
+  const h2 = Number(d.hole2Height);
+
+  drawEdgingSquare(
+    pdf, board, 'otwór2Dół',
+    [x2, y2],
+    [x2 + w2, y2],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór2Góra',
+    [x2, y2 + h2],
+    [x2 + w2, y2 + h2],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór2Lewo',
+    [x2, y2],
+    [x2, y2 + h2],
+    startX, startY, scale
+  );
+
+  drawEdgingSquare(
+    pdf, board, 'otwór2Prawo',
+    [x2 + w2, y2],
+    [x2 + w2, y2 + h2],
+    startX, startY, scale
+  );
+}
+
+
+
+
+
+
   if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
     const x = d.cutoutOffsetWidth;
     const y = d.cutoutOffsetLength;
@@ -511,7 +923,7 @@ function drawGrainDirection(
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
 
-  // KLIP do prawdziwego kształtu formatki
+  // KLIP DO PRAWDZIWEGO KSZTAŁTU FORMATKI
   pdf.saveGraphicsState();
 
   pdf.moveTo(pdfPoints[0][0], pdfPoints[0][1]);
@@ -521,87 +933,217 @@ function drawGrainDirection(
   }
 
   pdf.close();
-  pdf.clip();
+
+  // =========================================================
+  // RECT_DOUBLE_CUTOUT — kształt minus dwa otwory
+  // =========================================================
+
+  if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+    const d = board.dimensions;
+
+const holes = [
+  {
+    x: Number(d.hole1OffsetWidth),
+    y: Number(d.hole1OffsetLength),
+    w: Number(d.hole1Width),
+    h: Number(d.hole1Height)
+  },
+  {
+    x: Number(d.hole2OffsetWidth),
+    y: Number(d.hole2OffsetLength),
+    w: Number(d.hole2Width),
+    h: Number(d.hole2Height)
+  }
+];
+
+
+
+    for (const hole of holes) {
+      const left = startX + hole.x * scale;
+      const right = startX + (hole.x + hole.w) * scale;
+
+      const top =
+        startY - (hole.y + hole.h) * scale;
+
+      const bottom =
+        startY - hole.y * scale;
+
+      pdf.moveTo(left, bottom);
+      pdf.lineTo(right, bottom);
+      pdf.lineTo(right, top);
+      pdf.lineTo(left, top);
+      pdf.close();
+    }
+
+    pdf.clipEvenOdd();
+  } else {
+    // STARE FORMATKI — dokładnie zwykły klip
+    pdf.clip();
+  }
 
   pdf.setLineWidth(0.03);
   pdf.setDrawColor(170);
 
   const spacing = 7;
 
+  // =========================================================
+  // STARE OTWORY:
+  // RECT_INNER_CUTOUT
+  // TRAPEZOID_INNER_CUTOUT
+  // =========================================================
+
   const hasCutout =
-  board.shape === 'RECT_INNER_CUTOUT' ||
-  board.shape === 'TRAPEZOID_INNER_CUTOUT';
+    board.shape === 'RECT_INNER_CUTOUT' ||
+    board.shape === 'TRAPEZOID_INNER_CUTOUT';
 
-let cutLeft = 0;
-let cutRight = 0;
-let cutTop = 0;
-let cutBottom = 0;
+  let cutLeft = 0;
+  let cutRight = 0;
+  let cutTop = 0;
+  let cutBottom = 0;
 
-if (hasCutout) {
-  const d: any = board.dimensions;
+  if (hasCutout) {
+    const d: any = board.dimensions;
 
-  cutLeft =
-    startX + Number(d.cutoutOffsetWidth) * scale;
+    cutLeft =
+      startX +
+      Number(d.cutoutOffsetWidth) * scale;
 
-  cutRight =
-    startX +
-    (Number(d.cutoutOffsetWidth) + Number(d.cutoutWidth)) *
-      scale;
+    cutRight =
+      startX +
+      (
+        Number(d.cutoutOffsetWidth) +
+        Number(d.cutoutWidth)
+      ) * scale;
 
-  cutBottom =
-    startY - Number(d.cutoutOffsetLength) * scale;
+    cutBottom =
+      startY -
+      Number(d.cutoutOffsetLength) * scale;
 
-  cutTop =
-    startY -
-    (Number(d.cutoutOffsetLength) + Number(d.cutoutLength)) *
-      scale;
-}
+    cutTop =
+      startY -
+      (
+        Number(d.cutoutOffsetLength) +
+        Number(d.cutoutLength)
+      ) * scale;
+  }
 
-// PION
-if (board.grainDirection === 'vertical') {
-  for (let x = minX + spacing; x < maxX; x += spacing) {
+  // =========================================================
+  // PION
+  // =========================================================
 
-    const ys = getIntersectionsY(x, pdfPoints);
+  if (board.grainDirection === 'vertical') {
+    for (let x = minX + spacing; x < maxX; x += spacing) {
 
-    if (ys.length < 2) continue;
+      const ys = getIntersectionsY(x, pdfPoints);
 
-    const yTop = ys[0];
-    const yBottom = ys[ys.length - 1];
+      if (ys.length < 2) continue;
 
-    if (!hasCutout || x < cutLeft || x > cutRight) {
-      pdf.line(x, yTop + 0.5, x, yBottom - 0.5);
-    } else {
-      pdf.line(x, yTop + 0.5, x, cutTop - 0.5);
-      pdf.line(x, cutBottom + 0.5, x, yBottom - 0.5);
+      const yTop = ys[0];
+      const yBottom = ys[ys.length - 1];
+
+      // STARE FORMATKI Z JEDNYM OTWOREM
+      if (hasCutout) {
+
+        if (x < cutLeft || x > cutRight) {
+          pdf.line(
+            x,
+            yTop + 0.5,
+            x,
+            yBottom - 0.5
+          );
+        } else {
+          // przerwa w miejscu otworu
+          pdf.line(
+            x,
+            yTop + 0.5,
+            x,
+            cutTop - 0.5
+          );
+
+          pdf.line(
+            x,
+            cutBottom + 0.5,
+            x,
+            yBottom - 0.5
+          );
+        }
+
+      } else {
+
+        // RECT_DOUBLE_CUTOUT oraz pozostałe formatki
+        // obsługiwane przez clipping
+        pdf.line(
+          x,
+          yTop + 0.5,
+          x,
+          yBottom - 0.5
+        );
+      }
     }
   }
-}
 
-// POZIOM
-if (board.grainDirection === 'horizontal') {
-  for (let y = minY + spacing; y < maxY; y += spacing) {
+  // =========================================================
+  // POZIOM
+  // =========================================================
 
-    const xs = getIntersectionsX(y, pdfPoints);
+  if (board.grainDirection === 'horizontal') {
+    for (let y = minY + spacing; y < maxY; y += spacing) {
 
-    if (xs.length < 2) continue;
+      const xs = getIntersectionsX(y, pdfPoints);
 
-    const xLeft = xs[0];
-    const xRight = xs[xs.length - 1];
+      if (xs.length < 2) continue;
 
-    if (!hasCutout || y < cutTop || y > cutBottom) {
-      pdf.line(xLeft + 0.5, y, xRight - 0.5, y);
-    } else {
-      pdf.line(xLeft + 0.5, y, cutLeft - 0.5, y);
-      pdf.line(cutRight + 0.5, y, xRight - 0.5, y);
+      const xLeft = xs[0];
+      const xRight = xs[xs.length - 1];
+
+      // STARE FORMATKI Z JEDNYM OTWOREM
+      if (hasCutout) {
+
+        if (y < cutTop || y > cutBottom) {
+
+          pdf.line(
+            xLeft + 0.5,
+            y,
+            xRight - 0.5,
+            y
+          );
+
+        } else {
+
+          // przerwa w miejscu otworu
+          pdf.line(
+            xLeft + 0.5,
+            y,
+            cutLeft - 0.5,
+            y
+          );
+
+          pdf.line(
+            cutRight + 0.5,
+            y,
+            xRight - 0.5,
+            y
+          );
+        }
+
+      } else {
+
+        // RECT_DOUBLE_CUTOUT oraz pozostałe formatki
+        // obsługiwane przez clipping
+        pdf.line(
+          xLeft + 0.5,
+          y,
+          xRight - 0.5,
+          y
+        );
+      }
     }
   }
-}
 
   pdf.restoreGraphicsState();
 
   pdf.setDrawColor(0);
 }
-
 
 
 
@@ -641,18 +1183,18 @@ function printSelectedBoardsToPdf() {
     const startY = 240;
     pdf.setFontSize(22);
     pdf.text(board.number, 15, 22);
-    if (board.shape !== 'RECT') {
-  pdf.setLineWidth(0.15);
-  pdf.rect(
-    startX,
-    startY - bounds.height * scale,
-    bounds.width * scale,
-    bounds.height * scale
-  );
-}
+//    if (board.shape !== 'RECT') {
+//  pdf.setLineWidth(0.15);
+//  pdf.rect(
+//    startX,
+//    startY - bounds.height * scale,
+//    bounds.width * scale,
+//    bounds.height * scale
+//  );
+//}
 
 drawGrainDirection(pdf, board, points, startX, startY, scale);
-drawShape(pdf, points, startX, startY, scale);
+drawShape(pdf, points, startX, startY, scale, board);
 drawEdgingSquares(pdf, board, startX, startY, scale);
 drawTechnicalDimensions(pdf, board, points, startX, startY, scale);
   });
@@ -733,8 +1275,16 @@ clearMeasurement,
         <div className="toolbar-panel toolbar-panel-wide">
           <div className="materials-popover-header">
             <strong>Ustawienia materiałów projektu</strong>
-            <button className="secondary" onClick={() => setMaterialsOpen(false)}>Zamknij</button>
-          </div>
+<button
+  type="button"
+  className="secondary"
+  onClick={(e) => {
+    e.stopPropagation();
+    setMaterialsOpen(false);
+  }}
+>
+  Zamknij
+</button>          </div>
 
           <div className="project-materials">
             {([

@@ -4,7 +4,8 @@ import type {
   RectCornerNotchDims,
   RectCutCornerDims,
   RectDims,
-  RectInnerCutoutDims
+  RectInnerCutoutDims,
+  RectDoubleCutoutDims
 } from '../types';
 
 function shapeRect(d: RectDims) {
@@ -56,6 +57,99 @@ function shapeRectInnerCutout(d: RectInnerCutoutDims) {
   s.holes.push(hole);
   return s;
 }
+
+
+function shapeRectDoubleCutout(d: RectDoubleCutoutDims) {
+  const s = new THREE.Shape();
+
+// LEWY DOLNY POCZĄTEK ŚCIĘCIA
+s.moveTo(d.width2, 0);
+
+// DÓŁ
+s.lineTo(d.width, 0);
+
+// PRAWA
+s.lineTo(d.width, d.length);
+
+// GÓRA
+s.lineTo(d.width1, d.length);
+
+// LEWE GÓRNE ŚCIĘCIE
+s.lineTo(0, d.length - d.length1);
+
+// LEWY PROSTY BOK
+s.lineTo(0, d.length2);
+
+// LEWE DOLNE ŚCIĘCIE
+s.lineTo(d.width2, 0);
+
+s.closePath();
+
+
+  // OTWÓR 1
+  const hole1 = new THREE.Path();
+
+  hole1.moveTo(
+    d.hole1OffsetWidth,
+    d.hole1OffsetLength
+  );
+
+  hole1.lineTo(
+    d.hole1OffsetWidth + d.hole1Width,
+    d.hole1OffsetLength
+  );
+
+  hole1.lineTo(
+    d.hole1OffsetWidth + d.hole1Width,
+    d.hole1OffsetLength + d.hole1Height
+  );
+
+  hole1.lineTo(
+    d.hole1OffsetWidth,
+    d.hole1OffsetLength + d.hole1Height
+  );
+
+  hole1.closePath();
+
+  s.holes.push(hole1);
+
+  // OTWÓR 2
+  const hole2 = new THREE.Path();
+
+  hole2.moveTo(
+    d.hole2OffsetWidth,
+    d.hole2OffsetLength
+  );
+
+  hole2.lineTo(
+    d.hole2OffsetWidth + d.hole2Width,
+    d.hole2OffsetLength
+  );
+
+  hole2.lineTo(
+    d.hole2OffsetWidth + d.hole2Width,
+    d.hole2OffsetLength + d.hole2Height
+  );
+
+  hole2.lineTo(
+    d.hole2OffsetWidth,
+    d.hole2OffsetLength + d.hole2Height
+  );
+
+  hole2.closePath();
+
+  s.holes.push(hole2);
+
+  return s;
+}
+
+
+
+
+
+
+
+
 
 function createRightTrapezoidShape(
   width: number,
@@ -132,9 +226,14 @@ export function getShape2D(item: BoardItem) {
       return shapeRectCornerNotch(item.dimensions as RectCornerNotchDims);
 
     case 'RECT_INNER_CUTOUT':
-      return shapeRectInnerCutout(item.dimensions as RectInnerCutoutDims);
+  return shapeRectInnerCutout(item.dimensions as RectInnerCutoutDims);
 
-    case 'RIGHT_TRAPEZOID': {
+case 'RECT_DOUBLE_CUTOUT':
+  return shapeRectDoubleCutout(
+    item.dimensions as RectDoubleCutoutDims
+  );
+
+case 'RIGHT_TRAPEZOID': {
   const d: any = item.dimensions;
   return createRightTrapezoidShape(
     d.width,
@@ -185,11 +284,21 @@ export function createBoardGeometry(item: BoardItem) {
   const textureScale = 600;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
-    const y = pos.getY(i);
-    uvs.push(
-      x / textureScale,
-      y / textureScale
-    );
+const y = pos.getY(i);
+
+if (item.shape === 'RECT_DOUBLE_CUTOUT') {
+  // Obracamy mapowanie tekstury o 90°,
+  // żeby słoje szły wzdłuż długości formatki.
+  uvs.push(
+    y / textureScale,
+    x / textureScale
+  );
+} else {
+  uvs.push(
+    x / textureScale,
+    y / textureScale
+  );
+}
   }
   geometry.setAttribute(
     'uv',

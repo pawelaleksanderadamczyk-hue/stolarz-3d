@@ -244,6 +244,50 @@ useEffect(() => {
     }
 
 
+if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+  return (
+    <>
+      {row('dimension-row dimension-row-3', <>
+        {field('Wysokość', 'length')}
+        {field('Szerokość', 'width')}
+        {field('Grubość', 'thickness')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Wysokość 1', 'length1')}
+        {field('Szerokość 1', 'width1')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Wysokość 2', 'length2')}
+        {field('Szerokość 2', 'width2')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Otwór 1 szerokość', 'hole1Width')}
+        {field('Otwór 1 wysokość', 'hole1Height')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Otwór 1 położenie szerokość', 'hole1OffsetWidth')}
+        {field('Otwór 1 położenie wysokość', 'hole1OffsetLength')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Otwór 2 szerokość', 'hole2Width')}
+        {field('Otwór 2 wysokość', 'hole2Height')}
+      </>)}
+
+      {row('dimension-row dimension-row-2', <>
+        {field('Otwór 2 położenie szerokość', 'hole2OffsetWidth')}
+        {field('Otwór 2 położenie wysokość', 'hole2OffsetLength')}
+      </>)}
+    </>
+  );
+}
+
+
+
 if (board.shape === 'RIGHT_TRAPEZOID') {
   return (
     <>
@@ -365,6 +409,35 @@ if (board.shape === 'TRAPEZOID_INNER_CUTOUT') {
         { key: 'otwórPrawo', label: 'Otwór szerokość 2' }
       );
     }
+
+
+
+if (board.shape === 'RECT_DOUBLE_CUTOUT') {
+  options.length = 0;
+
+  options.push(
+    { key: 'doubleRight', label: 'Prawa' },
+    { key: 'doubleLeft', label: 'Lewa' },
+    { key: 'doubleTop', label: 'Góra' },
+    { key: 'doubleBottom', label: 'Dół' },
+    { key: 'cut1', label: 'Ścięcie 1' },
+    { key: 'cut2', label: 'Ścięcie 2' },
+
+    { key: 'otwór1Prawo', label: 'Otwór 1 — prawo' },
+    { key: 'otwór1Lewo', label: 'Otwór 1 — lewo' },
+    { key: 'otwór1Góra', label: 'Otwór 1 — góra' },
+    { key: 'otwór1Dół', label: 'Otwór 1 — dół' },
+
+    { key: 'otwór2Lewo', label: 'Otwór 2 — lewo' },
+    { key: 'otwór2Prawo', label: 'Otwór 2 — prawo' },
+    { key: 'otwór2Góra', label: 'Otwór 2 — góra' },
+    { key: 'otwór2Dół', label: 'Otwór 2 — dół' }
+  );
+
+  return options;
+}
+
+
 
 if (board.shape === 'RIGHT_TRAPEZOID') {
   return [
@@ -585,9 +658,41 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
     }}
   />
 
-  <span>Wybierz do wydruku</span>
-</label>
+        <span>Wybierz do wydruku</span>
+    </label>
 
-    </aside>
+    <label
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+        marginTop: '16px',
+        marginLeft: '28px',
+        marginRight: '12px',
+        fontSize: '15px'
+      }}
+    >
+      <span>Uwagi</span>
+      <textarea
+        value={board.uwagi ?? ''}
+        onChange={(e) =>
+          updateBoard(board.id, {
+            uwagi: e.target.value
+          })
+        }
+        rows={4}
+        placeholder="Wpisz uwagi do formatki..."
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          resize: 'vertical',
+          padding: '8px',
+          fontFamily: 'inherit',
+          fontSize: '14px'
+        }}
+      />
+    </label>
+
+  </aside>
   );
 }

@@ -3,6 +3,7 @@ export type ShapeType =
   | 'RECT_CUT_CORNER'
   | 'RECT_CORNER_NOTCH'
   | 'RECT_INNER_CUTOUT'
+  | 'RECT_DOUBLE_CUTOUT'
   | 'RIGHT_TRAPEZOID'
   | 'TRAPEZOID'
   | 'TRAPEZOID_INNER_CUTOUT';
@@ -48,6 +49,34 @@ export interface RectInnerCutoutDims {
   cutoutWidth: number;
   thickness: number;
 }
+
+
+export interface RectDoubleCutoutDims {
+  // Wymiary zewnętrzne
+  length: number;
+  width: number;
+  width1: number;
+  length1: number;
+  width2: number;
+  length2: number;
+
+  // Otwór 1
+  hole1Width: number;
+  hole1Height: number;
+  hole1OffsetWidth: number;
+  hole1OffsetLength: number;
+
+  // Otwór 2
+  hole2Width: number;
+  hole2Height: number;
+  hole2OffsetWidth: number;
+  hole2OffsetLength: number;
+
+  thickness: number;
+}
+
+
+
 export interface RightTrapezoidDims {
   lengthLeft: number;
   lengthRight: number;
@@ -73,7 +102,16 @@ export interface TrapezoidInnerCutoutDims {
   thickness: number;
 }
 
-export type ShapeDimensions = RectDims | RectCutCornerDims | RectCornerNotchDims | RectInnerCutoutDims| RightTrapezoidDims | TrapezoidDims | TrapezoidInnerCutoutDims;
+export type ShapeDimensions =
+  | RectDims
+  | RectCutCornerDims
+  | RectCornerNotchDims
+  | RectInnerCutoutDims
+  | RectDoubleCutoutDims
+  | RightTrapezoidDims
+  | TrapezoidDims
+  | TrapezoidInnerCutoutDims;
+
 export type EdgeSelection = Record<string, boolean>;
 
 export interface BoardItem {
@@ -81,6 +119,7 @@ export interface BoardItem {
   number: string;
   name?: string;
   cabinetName?: string;
+uwagi?: string;
 hiddenInProject?: boolean;
   shape: ShapeType;
   role: PartRole;
