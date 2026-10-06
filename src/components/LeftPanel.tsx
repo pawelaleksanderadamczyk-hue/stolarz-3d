@@ -695,6 +695,42 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
 
 
 
+<label
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '10px',
+    marginLeft: '28px',
+    fontSize: '15px',
+    cursor: 'pointer'
+  }}
+>
+  <input
+    type="checkbox"
+    checked={Boolean(board.setSelected)}
+    onChange={(e) =>
+      updateBoard(board.id, {
+        setSelected: e.target.checked
+      })
+    }
+    style={{
+      width: '18px',
+      height: '18px',
+      cursor: 'pointer'
+    }}
+  />
+
+  <span>Zaznacz do zestawu</span>
+</label>
+
+
+
+
+
+
+
+
     <label
       style={{
         display: 'flex',

@@ -1457,7 +1457,9 @@ const [cabinetNewHeight, setCabinetNewHeight] = useState(0);
 const [cabinetNewWidth, setCabinetNewWidth] = useState(0);
 const [cabinetNewDepth, setCabinetNewDepth] = useState(0);
 const [cabinetNewPlinth, setCabinetNewPlinth] = useState(0);
-
+const [setTargetX, setSetTargetX] = useState(0);
+const [setTargetY, setSetTargetY] = useState(0);
+const [setTargetZ, setSetTargetZ] = useState(0);
 
 const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1467,6 +1469,11 @@ const cabinetsFileInputRef =
 
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
+const [setMoveOpen, setSetMoveOpen] = useState(false);
+
+
+
+
 
 const {
   project,
@@ -1481,7 +1488,8 @@ copyCabinet,
 updateCabinet,
 updateCabinetBoardFormulas,
 removeCabinetBoard,
-  openAddBoardModal,
+moveSelectedSetTo,
+    openAddBoardModal,
     updateProjectAnchor,
     resetView,
     undo,
@@ -1571,6 +1579,9 @@ const hasSelectedBoards = boards.some(
 
 
           <button onClick={() => setAnchorOpen((prev) => !prev)}>Narożnik dodawanych</button>
+<button onClick={() => setSetMoveOpen((prev) => !prev)}>
+  Przesuń zestaw
+</button>
           <button onClick={resetView}>Reset widoku</button>
           <button onClick={undo}>Cofnij</button>
           <button onClick={redo}>Ponów</button>
@@ -1718,6 +1729,81 @@ const hasSelectedBoards = boards.some(
           </div>
         </div>
       )}
+
+
+
+
+{setMoveOpen && (
+  <div className="toolbar-panel toolbar-panel-anchor">
+    <div className="materials-popover-header">
+      <strong>Punkt docelowy zestawu</strong>
+
+      <button
+        className="secondary"
+        onClick={() => setSetMoveOpen(false)}
+      >
+        Zamknij
+      </button>
+    </div>
+
+    <div className="toolbar-group anchor-group anchor-editor">
+      <label>
+        X
+        <input
+          type="number"
+          value={setTargetX}
+          onChange={(e) =>
+            setSetTargetX(Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label>
+        Y
+        <input
+          type="number"
+          value={setTargetY}
+          onChange={(e) =>
+            setSetTargetY(Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label>
+        Z
+        <input
+          type="number"
+          value={setTargetZ}
+          onChange={(e) =>
+            setSetTargetZ(Number(e.target.value))
+          }
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={() => {
+  console.log('PRZESUŃ', {
+    x: setTargetX,
+    y: setTargetY,
+    z: setTargetZ
+  });
+
+  moveSelectedSetTo({
+    x: setTargetX,
+    y: setTargetY,
+    z: setTargetZ
+  });
+}}
+      >
+        Przesuń zestaw
+      </button>
+    </div>
+  </div>
+)}
+
+
+
 
 
 

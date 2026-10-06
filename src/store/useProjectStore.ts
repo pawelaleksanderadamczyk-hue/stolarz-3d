@@ -1,7 +1,15 @@
 import { create } from 'zustand';
 import { boardsToCsv } from '../core/csv';
 import { SHAPE_CODES } from '../core/constants';
-import { createBoard, createDefaultDimensions, createEmptyProject, identityQuaternion, moveBoardByLeadingCorner, rotateQuaternionAroundWorldAxis } from '../core/project';
+import {
+  createBoard,
+  createDefaultDimensions,
+  createEmptyProject,
+  identityQuaternion,
+  moveBoardByLeadingCorner,
+  rotateQuaternionAroundWorldAxis,
+  getOuterVertices3D
+} from '../core/project';
 import { createCabinetTemplate } from '../core/cabinets';
 import type {
   BoardItem,
@@ -281,6 +289,11 @@ addCabinetToProject: (
 
 
   moveSelectedBoardsTo: (target: Vec3) => void;
+
+
+moveSelectedSetTo: (target: Vec3) => void;
+
+
   removeBoard: (id: string) => void;
   setViewMode: (mode: ViewMode) => void;
   resetView: () => void;
@@ -1633,6 +1646,93 @@ const Z2 = evaluateCabinetFormula(
       selectedBoardId: selectedIds[0] ?? null
     });
   },
+
+
+
+
+
+
+moveSelectedSetTo: (target) => {
+  const state = get();
+
+  const project = cloneProject(state.project);
+
+  const setBoards = project.boards.filter(
+    (board) =>
+      board.setSelected === true &&
+      !board.hiddenInProject
+  );
+
+  if (!setBoards.length) {
+    window.alert('Nie zaznaczono żadnej formatki do zestawu.');
+    return;
+  }
+
+  // Szukamy dokładnie tego samego punktu,
+  // który jest pokazywany jako zielony punkt w SceneView.
+  let leading: Vec3 | null = null;
+  let leadingDistance = Infinity;
+
+  for (const board of setBoards) {
+    const vertices = getOuterVertices3D(board);
+
+    for (const vertex of vertices) {
+      const distance =
+        vertex.x * vertex.x +
+        vertex.y * vertex.y +
+        vertex.z * vertex.z;
+
+      if (distance < leadingDistance) {
+        leadingDistance = distance;
+
+        leading = {
+          x: vertex.x,
+          y: vertex.y,
+          z: vertex.z
+        };
+      }
+    }
+  }
+
+  if (!leading) {
+    return;
+  }
+
+  // Przesunięcie zielonego punktu do zadanego X/Y/Z.
+  const dx = target.x - leading.x;
+  const dy = target.y - leading.y;
+  const dz = target.z - leading.z;
+
+  // Przesuwamy wszystkie formatki należące do zestawu
+  // dokładnie o ten sam wektor.
+  project.boards = project.boards.map((board) => {
+    if (!board.setSelected) {
+      return board;
+    }
+
+    return {
+      ...board,
+      anchor: {
+        x: board.anchor.x + dx,
+        y: board.anchor.y + dy,
+        z: board.anchor.z + dz
+      }
+    };
+  });
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
+
+
+
+
+
+
+
 
   removeBoard: (id) => {
     const state = get();

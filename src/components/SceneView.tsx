@@ -895,7 +895,8 @@ useEffect(() => {
 
 function BoardMesh({ board, selected }: { board: BoardItem; selected: boolean }) {
   const selectBoard = useProjectStore((s) => s.selectBoard);
-
+const updateBoard = useProjectStore((s) => s.updateBoard);
+  const boards = useProjectStore((s) => s.project.boards);
 
 const selectedBoardIds = useProjectStore((s) => s.selectedBoardIds);
 const setSelectedBoards = useProjectStore((s) => s.setSelectedBoards);
@@ -915,9 +916,11 @@ const setSelectedBoards = useProjectStore((s) => s.setSelectedBoards);
   const materialPalette = materials?.[family] ?? {};
 const materialColor =
   materialPalette?.[board.material.materialIndex] ?? 'biały';
-const color = selected
-  ? '#f5a623'
-  : COLOR_TO_HEX[materialColor] ?? '#d8b16a';
+const color = board.setSelected
+  ? '#00c853'
+  : selected
+    ? '#f5a623'
+    : COLOR_TO_HEX[materialColor] ?? '#d8b16a';
 
 const selectedBoardId = useProjectStore((s) => s.selectedBoardId);
 
@@ -1001,6 +1004,49 @@ grainTexture.needsUpdate = true;
 const leadingCorner = getLeadingCorner(board);
 const vertices = getOuterVertices3D(board);
 
+
+
+
+
+  const setCorner = useMemo(() => {
+    const selectedSetBoards = boards.filter(
+      (b) => b.setSelected === true && !b.hiddenInProject
+    );
+
+    let nearest: THREE.Vector3 | null = null;
+    let nearestDistance = Infinity;
+
+    for (const setBoard of selectedSetBoards) {
+      const boardVertices = getOuterVertices3D(setBoard);
+
+      for (const vertex of boardVertices) {
+        const distance = Math.sqrt(
+          vertex.x * vertex.x +
+          vertex.y * vertex.y +
+          vertex.z * vertex.z
+        );
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = new THREE.Vector3(
+            vertex.x,
+            vertex.y,
+            vertex.z
+          );
+        }
+      }
+    }
+
+    return nearest;
+  }, [boards]);
+
+
+
+
+
+
+
+
 const markerPosition: [number, number, number] = [
   leadingCorner.x - board.anchor.x,
   leadingCorner.y - board.anchor.y,
@@ -1018,6 +1064,16 @@ const markerPosition: [number, number, number] = [
 
 onClick={(e) => {
   e.stopPropagation();
+
+  // Jeśli formatka należy do zestawu,
+  // kliknięcie wyłącza ją z zestawu.
+  if (board.setSelected) {
+    updateBoard(board.id, {
+      setSelected: false
+    });
+
+    return;
+  }
 
   const ctrl = e.nativeEvent.ctrlKey;
 
@@ -1046,6 +1102,9 @@ onClick={(e) => {
 
 
 
+
+
+
     >
       <mesh geometry={geometry} renderOrder={1}>
         
@@ -1054,12 +1113,14 @@ onClick={(e) => {
 <meshStandardMaterial
   key={selectedMaterial.id}
   color={
-    selected
+  board.setSelected
+    ? '#00c853'
+    : selected
       ? '#f5a623'
       : selectedMaterial.type === 'color'
       ? selectedMaterial.color
       : '#ffffff'
-  }
+}
   map={selectedMaterial.type === 'texture' ? grainTexture : undefined}
   side={THREE.DoubleSide}
   roughness={0.85}
@@ -1088,6 +1149,33 @@ onClick={(e) => {
     <meshBasicMaterial color="red" depthTest={false} />
   </mesh>
 )}
+
+
+
+{board.setSelected &&
+  setCorner &&
+  Math.abs(setCorner.x - leadingCorner.x) < 0.001 &&
+  Math.abs(setCorner.y - leadingCorner.y) < 0.001 &&
+  Math.abs(setCorner.z - leadingCorner.z) < 0.001 && (
+    <mesh
+      position={[
+        setCorner.x,
+        setCorner.y,
+        setCorner.z
+      ]}
+      renderOrder={21}
+    >
+      <sphereGeometry args={[5.2, 16, 16]} />
+      <meshBasicMaterial
+        color="#00ff00"
+        depthTest={false}
+      />
+    </mesh>
+  )}
+
+
+
+
 
 {(selectedBoardId === board.id || measureMode) &&
   vertices.map((v, i) => {
@@ -1173,6 +1261,7 @@ function SelectionController({
   const selectionMode = useProjectStore((s) => s.selectionMode);
   const setSelectedBoards = useProjectStore((s) => s.setSelectedBoards);
   const selectBoard = useProjectStore((s) => s.selectBoard);
+const updateBoard = useProjectStore((s) => s.updateBoard);
   const moveSelectedBoardsTo = useProjectStore((s) => s.moveSelectedBoardsTo);
 
   useEffect(() => {
