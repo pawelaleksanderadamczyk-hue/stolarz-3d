@@ -661,6 +661,40 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         <span>Wybierz do wydruku</span>
     </label>
 
+
+
+<label
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '14px',
+    marginLeft: '28px',
+    fontSize: '15px',
+    cursor: 'pointer'
+  }}
+>
+  <input
+    type="checkbox"
+    checked={Boolean(board.cabinetSelected)}
+    onChange={(e) =>
+      updateBoard(board.id, {
+        cabinetSelected: e.target.checked
+      })
+    }
+    style={{
+      width: '18px',
+      height: '18px',
+      cursor: 'pointer'
+    }}
+  />
+
+  <span>Wybierz do tworzonej szafki</span>
+</label>
+
+
+
+
     <label
       style={{
         display: 'flex',

@@ -47,7 +47,9 @@ defaultGrainDirections: {
   inne: 'vertical'
 },
 
-    boards: []
+  boards: [],
+  cabinets: []
+
   };
 }
 

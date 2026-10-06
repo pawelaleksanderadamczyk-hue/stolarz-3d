@@ -323,17 +323,35 @@ function toVector3(v: Vec3) {
   return new THREE.Vector3(v.x, v.y, v.z);
 }
 
+
+
+
+
 function getPlaneQuaternion(board: BoardItem) {
-  const basis = getPlaneBasis('YZ');
+  const basis = getPlaneBasis(board.plane);
+
   const m = new THREE.Matrix4().makeBasis(
     toVector3(basis.length),
     toVector3(basis.width),
     toVector3(basis.thickness)
   );
+
   const q = new THREE.Quaternion();
   q.setFromRotationMatrix(m);
+
   return q;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 function toThreeQuaternion(q: { x: number; y: number; z: number; w: number }) {
@@ -877,6 +895,12 @@ useEffect(() => {
 
 function BoardMesh({ board, selected }: { board: BoardItem; selected: boolean }) {
   const selectBoard = useProjectStore((s) => s.selectBoard);
+
+
+const selectedBoardIds = useProjectStore((s) => s.selectedBoardIds);
+const setSelectedBoards = useProjectStore((s) => s.setSelectedBoards);
+
+
   const materials = useProjectStore((s) => s.project.materials);
   const family =
   board.role === 'KORPUS'
@@ -988,7 +1012,40 @@ const markerPosition: [number, number, number] = [
     <group
       position={[board.anchor.x, board.anchor.y, board.anchor.z]}
       quaternion={finalQuaternion}
-      onClick={(e) => { e.stopPropagation(); selectBoard(board.id); }}
+
+
+
+
+onClick={(e) => {
+  e.stopPropagation();
+
+  const ctrl = e.nativeEvent.ctrlKey;
+
+  if (ctrl) {
+    const current = useProjectStore.getState().selectedBoardIds;
+
+    if (current.includes(board.id)) {
+      const next = current.filter((id) => id !== board.id);
+
+      setSelectedBoards(next);
+      selectBoard(next[0] ?? null);
+    } else {
+      const next = [...current, board.id];
+
+      setSelectedBoards(next);
+      selectBoard(board.id);
+    }
+
+    return;
+  }
+
+  // Zwykłe kliknięcie = tylko ta jedna formatka
+  setSelectedBoards([board.id]);
+  selectBoard(board.id);
+}}
+
+
+
     >
       <mesh geometry={geometry} renderOrder={1}>
         
@@ -1129,15 +1186,20 @@ function SelectionController({
       };
     };
 
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!selectionMode) return;
-      event.preventDefault();
-      event.stopPropagation();
+const handlePointerDown = (event: PointerEvent) => {
+  if (!selectionMode) return;
 
-      const point = getPoint(event);
-      setDragStart(point);
-      setDragEnd(point);
-    };
+  // Ctrl + klik służy do zaznaczania wielu formatek.
+  // Nie uruchamiamy wtedy prostokąta zaznaczenia.
+  if (event.ctrlKey) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const point = getPoint(event);
+  setDragStart(point);
+  setDragEnd(point);
+};
 
     const handlePointerMove = (event: PointerEvent) => {
       if (!selectionMode || !dragStart) return;

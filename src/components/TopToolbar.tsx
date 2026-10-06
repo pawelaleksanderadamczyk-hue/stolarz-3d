@@ -1422,18 +1422,66 @@ drawEdgingSquares(pdf, board, startX, startY, scale);
 }
 
 
+
+
+
+
+
+
+
+
+
+
 export function TopToolbar() {
   
+const [cabinetsOpen, setCabinetsOpen] = useState(false);
+
+const [selectedCabinetId, setSelectedCabinetId] =
+  useState<string | null>(null);
+const [editingCabinetId, setEditingCabinetId] = useState<string | null>(null);
+
+const [cabinetInsertX, setCabinetInsertX] = useState(0);
+const [cabinetInsertY, setCabinetInsertY] = useState(0);
+const [cabinetInsertZ, setCabinetInsertZ] = useState(0);
+
+
+const [cabinetFormOpen, setCabinetFormOpen] = useState(false);
+const [cabinetName, setCabinetName] = useState('');
+const [cabinetHeight, setCabinetHeight] = useState(720);
+const [cabinetWidth, setCabinetWidth] = useState(600);
+const [cabinetDepth, setCabinetDepth] = useState(560);
+const [cabinetPlinth, setCabinetPlinth] = useState(100);
+
+
+const [cabinetNewHeight, setCabinetNewHeight] = useState(0);
+const [cabinetNewWidth, setCabinetNewWidth] = useState(0);
+const [cabinetNewDepth, setCabinetNewDepth] = useState(0);
+const [cabinetNewPlinth, setCabinetNewPlinth] = useState(0);
+
 
 const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+const cabinetsFileInputRef =
+  useRef<HTMLInputElement | null>(null);
+
+
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
 
-  const {
-    project,
-    saveProjectToFile,
-    exportCsv,
-    openAddBoardModal,
+const {
+  project,
+  saveProjectToFile,
+  exportCsv,
+  saveCabinet,
+  addCabinetToProject,
+saveCabinetsToFile,
+  loadCabinetsFromFile,
+  deleteCabinet,
+copyCabinet,
+updateCabinet,
+updateCabinetBoardFormulas,
+removeCabinetBoard,
+  openAddBoardModal,
     updateProjectAnchor,
     resetView,
     undo,
@@ -1442,7 +1490,7 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
     setViewMode,
 measureMode,
 setMeasureMode,
-clearMeasurement,
+clearMeasurements,
     viewMode
   } = useProjectStore();
 
@@ -1473,9 +1521,55 @@ clearMeasurement,
 	  <button onClick={printSelectedBoardsToPdf}>Drukuj wybrane</button>
           <button onClick={() => {setMaterialsOpen((prev) => !prev)}}>Materiał</button>
 
-<button className={measureMode ? 'active' : ''} onClick={() => {setMeasureMode(!measureMode); clearMeasurement(); }}>Wymiary</button>
+<button
+  className={measureMode ? 'active' : ''}
+  onClick={() => {
+    setMeasureMode(!measureMode);
+  }}
+>
+  Wymiary
+</button>
 
           <button onClick={openAddBoardModal}>Dodaj formatkę</button>
+
+
+
+<button
+onClick={() => {
+const boards = useProjectStore.getState().project.boards;
+
+const hasSelectedBoards = boards.some(
+  (board) =>
+    board.cabinetSelected === true &&
+    !board.hiddenInProject
+);
+  if (!hasSelectedBoards) {
+    window.alert('Najpierw zaznacz formatki do tworzonej szafki.');
+    return;
+  }
+
+
+  setCabinetName('');
+  setCabinetFormOpen(true);
+}}
+>
+  Twórz szafkę
+</button>
+
+
+
+<button
+  onClick={() => setCabinetsOpen(true)}
+>
+  Szafki
+</button>
+
+
+
+
+
+
+
           <button onClick={() => setAnchorOpen((prev) => !prev)}>Narożnik dodawanych</button>
           <button onClick={resetView}>Reset widoku</button>
           <button onClick={undo}>Cofnij</button>
@@ -1624,6 +1718,806 @@ clearMeasurement,
           </div>
         </div>
       )}
+
+
+
+{cabinetFormOpen && (
+  <div className="toolbar-panel">
+    <div className="materials-popover-header">
+      <strong>Nowa szafka</strong>
+
+      <button
+        className="secondary"
+        onClick={() => setCabinetFormOpen(false)}
+      >
+        Anuluj
+      </button>
+    </div>
+    <div style={{ padding: '10px' }}>
+      <label style={{ display: 'block', marginBottom: '8px' }}>
+        Nazwa
+        <input
+          type="text"
+          value={cabinetName}
+          onChange={(e) => setCabinetName(e.target.value)}
+          placeholder="np. Szafka dolna 600"
+          style={{ display: 'block', width: '100%' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '8px' }}>
+        Wysokość [mm]
+        <input
+          type="number"
+          value={cabinetHeight}
+          onChange={(e) => setCabinetHeight(Number(e.target.value))}
+          style={{ display: 'block', width: '100%' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '8px' }}>
+        Szerokość [mm]
+        <input
+          type="number"
+          value={cabinetWidth}
+          onChange={(e) => setCabinetWidth(Number(e.target.value))}
+          style={{ display: 'block', width: '100%' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '8px' }}>
+        Głębokość [mm]
+        <input
+          type="number"
+          value={cabinetDepth}
+          onChange={(e) => setCabinetDepth(Number(e.target.value))}
+          style={{ display: 'block', width: '100%' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '12px' }}>
+        Cokół [mm]
+        <input
+          type="number"
+          value={cabinetPlinth}
+          onChange={(e) => setCabinetPlinth(Number(e.target.value))}
+          style={{ display: 'block', width: '100%' }}
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={() => {
+          if (!cabinetName.trim()) {
+            window.alert('Podaj nazwę szafki.');
+            return;
+          }
+
+          saveCabinet(cabinetName, {
+            height: cabinetHeight,
+            width: cabinetWidth,
+            depth: cabinetDepth,
+            plinth: cabinetPlinth
+          });
+
+          setCabinetFormOpen(false);
+          setCabinetsOpen(true);
+        }}
+      >
+        Zapisz szafkę
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+      {cabinetsOpen && (
+        <div className="toolbar-panel">
+<div className="materials-popover-header">
+  <strong>Zapisane szafki</strong>
+
+  <div style={{ display: 'flex', gap: '6px' }}>
+    <button
+      type="button"
+      onClick={() =>
+        cabinetsFileInputRef.current?.click()
+      }
+    >
+      Wczytaj szafki
+    </button>
+
+    <button
+      type="button"
+      onClick={saveCabinetsToFile}
+    >
+      Zapisz szafki
+    </button>
+
+    <button
+      className="secondary"
+      onClick={() => setCabinetsOpen(false)}
+    >
+      Zamknij
+    </button>
+  </div>
+
+  <input
+    ref={cabinetsFileInputRef}
+    hidden
+    type="file"
+    accept=".json,application/json"
+    onChange={async (e) => {
+      const input = e.target as HTMLInputElement;
+      const file = input.files?.[0];
+
+      if (file) {
+        await loadCabinetsFromFile(file);
+        input.value = '';
+      }
+    }}
+  />
+</div>
+          <div
+  style={{
+    padding: '10px',
+    maxHeight: '500px',
+    overflowY: 'auto',
+    overflowX: 'hidden'
+  }}
+>
+{project.cabinets?.length ? (
+project.cabinets.map((cabinet) => (
+                <div
+                  key={cabinet.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #ccc'
+                  }}
+                >
+<strong>{cabinet.name}</strong>
+
+<div style={{ display: 'flex', gap: '6px' }}>
+  <button
+    type="button"
+    onClick={() => {
+      setSelectedCabinetId(cabinet.id);
+    }}
+  >
+    Wybierz
+  </button>
+
+
+
+
+
+<button
+  type="button"
+  onClick={() => {
+    const newName = window.prompt(
+      'Podaj nazwę kopii szafki:',
+      `${cabinet.name} - kopia`
+    );
+
+    if (!newName?.trim()) {
+      return;
+    }
+
+    copyCabinet(
+      cabinet.id,
+      newName.trim()
+    );
+  }}
+>
+  Kopiuj
+</button>
+
+
+  <button
+    type="button"
+    onClick={() => {
+      deleteCabinet(cabinet.id);
+
+      if (selectedCabinetId === cabinet.id) {
+        setSelectedCabinetId(null);
+      }
+    }}
+  >
+    Usuń
+  </button>
+</div>
+
+
+{selectedCabinetId === cabinet.id && (
+  <div
+    style={{
+      marginTop: '8px',
+      padding: '8px',
+      background: '#f3f3f3',
+      borderRadius: '4px'
+    }}
+  >
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 2.5fr 1fr 1fr',
+        gap: '12px',
+        alignItems: 'start'
+      }}
+    >
+
+      {/* ================================================= */}
+      {/* 1. WYMIARY SZABLONU                               */}
+      {/* ================================================= */}
+
+      <div
+        style={{
+          padding: '10px',
+          background: '#ffffff',
+          borderRadius: '4px'
+        }}
+      >
+        <strong>Wymiary szafki:</strong>
+
+        <div style={{ marginTop: '8px' }}>
+          Wysokość: {cabinet.baseDimensions.height} mm
+        </div>
+
+        <div>
+          Szerokość: {cabinet.baseDimensions.width} mm
+        </div>
+
+        <div>
+          Głębokość: {cabinet.baseDimensions.depth} mm
+        </div>
+
+        <div>
+          Cokół: {cabinet.baseDimensions.plinth} mm
+        </div>
+      </div>
+
+
+      {/* ================================================= */}
+      {/* 2. FORMATKI + WZORY                               */}
+      {/* ================================================= */}
+
+      <div
+        style={{
+          padding: '10px',
+          background: '#ffffff',
+          borderRadius: '4px',
+          overflowX: 'auto'
+        }}
+      >
+        <strong>Formatki w szablonie:</strong>
+
+        <table
+          style={{
+            width: '100%',
+            marginTop: '8px',
+            borderCollapse: 'collapse',
+            fontSize: '12px'
+          }}
+        >
+<thead>
+  <tr>
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      Formatka
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      D1
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      S1
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      G1
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      D2
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      S2
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      G2
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      X2
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      Y2
+    </th>
+
+    <th style={{ border: '1px solid #ccc', padding: '4px' }}>
+      Z2
+    </th>
+
+<th
+  style={{
+    border: '1px solid #ccc',
+    padding: '4px'
+  }}
+>
+  Akcje
+</th>
+
+  </tr>
+</thead>
+
+<tbody>
+  {cabinet.boards.map((cabinetBoard) => (
+    <tr key={cabinetBoard.board.id}>
+
+      {/* Formatka */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        {cabinetBoard.board.number}
+      </td>
+
+
+{/* D1 */}
+<td
+  style={{
+    border: '1px solid #ccc',
+    padding: '4px'
+  }}
+>
+  {cabinetBoard.D1}
+</td>
+
+
+{/* S1 */}
+<td
+  style={{
+    border: '1px solid #ccc',
+    padding: '4px'
+  }}
+>
+  {cabinetBoard.S1}
+</td>
+
+      
+{/* G1 */}
+<td
+  style={{
+    border: '1px solid #ccc',
+    padding: '4px'
+  }}
+>
+  {cabinetBoard.G1}
+</td>
+
+      {/* D2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.D2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { D2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+      {/* S2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.S2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { S2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+      {/* G2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.G2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { G2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+      {/* X2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.X2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { X2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+      {/* Y2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.Y2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { Y2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+      {/* Z2 */}
+      <td
+        style={{
+          border: '1px solid #ccc',
+          padding: '4px'
+        }}
+      >
+        <input
+          type="text"
+          value={cabinetBoard.formulas?.Z2 ?? ''}
+          onChange={(e) =>
+            updateCabinetBoardFormulas(
+              cabinet.id,
+              cabinetBoard.board.id,
+              { Z2: e.target.value }
+            )
+          }
+          style={{ width: '70px' }}
+        />
+      </td>
+
+
+
+
+<td
+  style={{
+    border: '1px solid #ccc',
+    padding: '4px',
+    textAlign: 'center'
+  }}
+>
+  <button
+    type="button"
+    onClick={() => {
+      removeCabinetBoard(
+        cabinet.id,
+        cabinetBoard.board.id
+      );
+    }}
+  >
+    Usuń
+  </button>
+</td>
+
+
+
+
+
+    </tr>
+  ))}
+</tbody>
+
+        </table>
+      </div>
+
+
+      {/* ================================================= */}
+      {/* 3. GDZIE WSTAWIĆ                                 */}
+      {/* ================================================= */}
+
+      <div
+        style={{
+          padding: '10px',
+          background: '#ffffff',
+          borderRadius: '4px'
+        }}
+      >
+        <strong>Gdzie wstawić szafkę?</strong>
+
+        <div
+          style={{
+            marginTop: '8px',
+            fontSize: '13px'
+          }}
+        >
+          Współrzędne narożnika szafki najbliższego początkowi układu:
+        </div>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '10px'
+          }}
+        >
+          X [mm]
+
+          <input
+            type="number"
+            value={cabinetInsertX}
+            onChange={(e) =>
+              setCabinetInsertX(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Y [mm]
+
+          <input
+            type="number"
+            value={cabinetInsertY}
+            onChange={(e) =>
+              setCabinetInsertY(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Z [mm]
+
+          <input
+            type="number"
+            value={cabinetInsertZ}
+            onChange={(e) =>
+              setCabinetInsertZ(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+      </div>
+
+
+      {/* ================================================= */}
+      {/* 4. NOWE WYMIARY                                   */}
+      {/* ================================================= */}
+
+      <div
+        style={{
+          padding: '10px',
+          background: '#ffffff',
+          borderRadius: '4px'
+        }}
+      >
+        <strong>Nowe wymiary szafki:</strong>
+
+        <button
+          type="button"
+          style={{
+            display: 'block',
+            marginTop: '10px',
+            marginBottom: '10px'
+          }}
+          onClick={() => {
+            setCabinetNewHeight(cabinet.baseDimensions.height);
+            setCabinetNewWidth(cabinet.baseDimensions.width);
+            setCabinetNewDepth(cabinet.baseDimensions.depth);
+            setCabinetNewPlinth(cabinet.baseDimensions.plinth);
+          }}
+        >
+          Ustaw wymiary szafki
+        </button>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Wysokość [mm]
+
+          <input
+            type="number"
+            value={cabinetNewHeight}
+            onChange={(e) =>
+              setCabinetNewHeight(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Szerokość [mm]
+
+          <input
+            type="number"
+            value={cabinetNewWidth}
+            onChange={(e) =>
+              setCabinetNewWidth(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Głębokość [mm]
+
+          <input
+            type="number"
+            value={cabinetNewDepth}
+            onChange={(e) =>
+              setCabinetNewDepth(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <label
+          style={{
+            display: 'block',
+            marginTop: '8px'
+          }}
+        >
+          Cokół [mm]
+
+          <input
+            type="number"
+            value={cabinetNewPlinth}
+            onChange={(e) =>
+              setCabinetNewPlinth(Number(e.target.value))
+            }
+            style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          />
+        </label>
+
+        <button
+          type="button"
+          style={{
+            marginTop: '12px'
+          }}
+          onClick={() => {
+            addCabinetToProject(
+              cabinet.id,
+              {
+                height: cabinetNewHeight,
+                width: cabinetNewWidth,
+                depth: cabinetNewDepth,
+                plinth: cabinetNewPlinth
+              },
+              {
+                x: cabinetInsertX,
+                y: cabinetInsertY,
+                z: cabinetInsertZ
+              }
+            );
+
+            setCabinetsOpen(false);
+            setSelectedCabinetId(null);
+          }}
+        >
+          Dodaj szafkę
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+                </div>
+              ))
+            ) : (
+              <div>Brak zapisanych szafek.</div>
+            )}
+          </div>
+        </div>
+      )}
+
+
+
+
+
     </div>
   );
 }

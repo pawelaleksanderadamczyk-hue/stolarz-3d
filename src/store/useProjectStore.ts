@@ -2,8 +2,11 @@ import { create } from 'zustand';
 import { boardsToCsv } from '../core/csv';
 import { SHAPE_CODES } from '../core/constants';
 import { createBoard, createDefaultDimensions, createEmptyProject, identityQuaternion, moveBoardByLeadingCorner, rotateQuaternionAroundWorldAxis } from '../core/project';
+import { createCabinetTemplate } from '../core/cabinets';
 import type {
   BoardItem,
+  CabinetBoard,
+CabinetTemplate,
   MaterialColor,
   MaterialIndex,
   PartRole,
@@ -16,6 +19,115 @@ import type {
   MeasurePoint,
   ViewMode
 } from '../types';
+
+import {
+  downloadCabinetsFile,
+  readCabinetsFile
+} from '../core/cabinetLibrary';
+
+
+
+
+function evaluateCabinetFormula(
+  formula: string | undefined,
+  variables: Record<string, number>,
+  cabinetBoards: CabinetBoard[]
+): number | null {
+  if (!formula?.trim()) return null;
+
+  try {
+    let expression = formula.trim();
+
+    // ==================================================
+    // ODNIESIENIA DO INNEJ FORMATKI
+    //
+    // D1.4 = długość formatki nr 4
+    // S1.4 = szerokość formatki nr 4
+    // G1.4 = grubość formatki nr 4
+    // ==================================================
+
+    expression = expression.replace(
+      /\b(D1|S1|G1)\.(\d+)\b/g,
+      (_match, dimension, boardNumber) => {
+
+        const cabinetBoard = cabinetBoards.find((cb) => {
+          const number = String(cb.board.number).trim();
+
+          return (
+            number === String(boardNumber).trim() ||
+            number === `PR-${boardNumber}`
+          );
+        });
+
+        if (!cabinetBoard) {
+          throw new Error(
+            `Nie znaleziono formatki nr ${boardNumber}`
+          );
+        }
+
+        if (dimension === 'D1') {
+          return String(cabinetBoard.D1);
+        }
+
+        if (dimension === 'S1') {
+          return String(cabinetBoard.S1);
+        }
+
+        if (dimension === 'G1') {
+          return String(cabinetBoard.G1);
+        }
+
+        throw new Error(
+          `Nieznany wymiar: ${dimension}`
+        );
+      }
+    );
+
+    // ==================================================
+    // DANE BIEŻĄCEJ FORMATKI
+    //
+    // D1 = długość bieżącej formatki
+    // S1 = szerokość bieżącej formatki
+    // G1 = grubość bieżącej formatki
+    // ==================================================
+
+    for (const [name, value] of Object.entries(variables)) {
+      expression = expression.replace(
+        new RegExp(`\\b${name}\\b`, 'g'),
+        String(value)
+      );
+    }
+
+    // Jeżeli zostały litery, wzór jest nieprawidłowy
+    if (/[A-Za-z]/.test(expression)) {
+      return null;
+    }
+
+    // Dozwolone tylko liczby i działania matematyczne
+    if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+      return null;
+    }
+
+    const result = Function(
+      `"use strict"; return (${expression});`
+    )();
+
+    return Number.isFinite(result)
+      ? Number(result)
+      : null;
+
+  } catch (error) {
+    console.error(
+      'Błąd obliczania wzoru:',
+      formula,
+      error
+    );
+
+    return null;
+  }
+}
+
+
 
 function createId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -70,6 +182,104 @@ clearMeasurements: () => void;
   applyRotationEditor: (id: string) => void;
   copyBoard: (id: string) => void;
   copySelectedBoards: () => void;
+
+
+updateCabinetBoardFormulas: (
+  cabinetId: string,
+  boardId: string,
+  patch: Partial<NonNullable<CabinetBoard['formulas']>>
+) => void;
+
+
+
+
+updateCabinetBoardDimensions: (
+  cabinetId: string,
+  boardId: string,
+  patch: {
+    D1?: number;
+    S1?: number;
+    G1?: number;
+  }
+) => void;
+
+
+
+updateCabinetBoardPlane: (
+  cabinetId: string,
+  boardId: string,
+  plane: 'ZY' | 'ZX' | 'XY'| 'XZ' | 'YX'| 'YZ'
+) => void;
+
+
+
+addCabinetBoard: (
+  cabinetId: string
+) => void;
+
+
+removeCabinetBoard: (
+  cabinetId: string,
+  boardId: string
+) => void;
+
+
+
+
+
+saveCabinetsToFile: () => void;
+
+loadCabinetsFromFile: (file: File) => Promise<void>;
+
+deleteCabinet: (cabinetId: string) => void;
+
+
+copyCabinet: (
+  cabinetId: string,
+  newName: string
+) => void;
+
+
+
+updateCabinet: (
+  cabinetId: string,
+  patch: {
+    name?: string;
+    height?: number;
+    width?: number;
+    depth?: number;
+    plinth?: number;
+  }
+) => void;
+
+
+
+
+
+saveCabinet: (
+  name: string,
+  dimensions: {
+    height: number;
+    width: number;
+    depth: number;
+    plinth: number;
+  }
+) => void;
+
+
+addCabinetToProject: (
+  cabinetId: string,
+  dimensions: {
+    height: number;
+    width: number;
+    depth: number;
+    plinth: number;
+  },
+  position: Vec3
+) => void;
+
+
+
   moveSelectedBoardsTo: (target: Vec3) => void;
   removeBoard: (id: string) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -517,6 +727,853 @@ updateBoardAnchor: (id, anchor) => {
     selectedBoardIds: copiedIds
   });
 },
+
+
+
+
+
+
+
+addCabinetBoard: (cabinetId) => {
+  const state = get();
+
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szablonu szafki.');
+    return;
+  }
+
+  if (!cabinet.boards.length) {
+    window.alert(
+      'Szablon nie zawiera żadnej formatki, na podstawie której można utworzyć nową.'
+    );
+    return;
+  }
+
+  const lastCabinetBoard =
+    cabinet.boards[cabinet.boards.length - 1];
+
+  const sourceBoard = lastCabinetBoard.board;
+
+  /*
+   * Nowa formatka dziedziczy:
+   * - kształt
+   * - materiał
+   * - rolę
+   * - okleinowanie
+   *
+   * ale NIE dziedziczy geometrii narożników/otworów
+   * ani obrotu poprzedniej formatki.
+   */
+  const newBoard: BoardItem = {
+    ...structuredClone(sourceBoard),
+
+    id: createId(),
+    number: `PR-${cabinet.boards.length + 1}`,
+
+    plane: 'XZ',
+
+    rotation: {
+      x: 0,
+      y: 0,
+      z: 0
+    },
+
+    rotationQuaternion: identityQuaternion(),
+
+    cabinetSelected: false,
+
+    dimensions: {
+      ...structuredClone(sourceBoard.dimensions)
+    }
+  };
+
+  /*
+   * Dla RECT_DOUBLE_CUTOUT tworzymy świeżą geometrię
+   * narożników i otworów.
+   *
+   * D1 = długość
+   * S1 = szerokość
+   * G1 = grubość
+   */
+  if (newBoard.shape === 'RECT_DOUBLE_CUTOUT') {
+    newBoard.dimensions = {
+      length: lastCabinetBoard.D1,
+      width: lastCabinetBoard.S1,
+
+      width1: 0,
+      length1: 0,
+
+      width2: 0,
+      length2: 0,
+
+      hole1Width: 0,
+      hole1Height: 0,
+      hole1OffsetWidth: 0,
+      hole1OffsetLength: 0,
+
+      hole2Width: 0,
+      hole2Height: 0,
+      hole2OffsetWidth: 0,
+      hole2OffsetLength: 0,
+
+      thickness: lastCabinetBoard.G1
+    };
+  }
+
+  const newCabinetBoard: CabinetBoard = {
+    board: newBoard,
+
+    D1: Number(newBoard.dimensions.length),
+    S1: Number(newBoard.dimensions.width),
+    G1: Number(newBoard.dimensions.thickness),
+
+    formulas: {
+      D2: '',
+      S2: '',
+      G2: '',
+      X2: '',
+      Y2: '',
+      Z2: ''
+    }
+  };
+
+  cabinet.boards.push(newCabinetBoard);
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+
+  downloadCabinetsFile(
+    project.cabinets ?? []
+  );
+},
+
+
+
+
+
+removeCabinetBoard: (cabinetId, boardId) => {
+  const state = get();
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szablonu szafki.');
+    return;
+  }
+
+  const cabinetBoard = cabinet.boards.find(
+    (item) => item.board.id === boardId
+  );
+
+  if (!cabinetBoard) {
+    window.alert('Nie znaleziono formatki w szablonie.');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Czy na pewno usunąć formatkę "${cabinetBoard.board.number}" z szablonu szafki?`
+  );
+
+  if (!confirmed) return;
+
+  cabinet.boards = cabinet.boards.filter(
+    (item) => item.board.id !== boardId
+  );
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+
+  downloadCabinetsFile(
+    project.cabinets ?? []
+  );
+},
+
+
+
+
+
+
+
+
+
+updateCabinetBoardDimensions: (
+  cabinetId,
+  boardId,
+  patch
+) => {
+  const state = get();
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szablonu szafki.');
+    return;
+  }
+
+  const cabinetBoard = cabinet.boards.find(
+    (item) => item.board.id === boardId
+  );
+
+  if (!cabinetBoard) {
+    window.alert('Nie znaleziono formatki.');
+    return;
+  }
+
+  if (patch.D1 !== undefined) {
+    cabinetBoard.D1 = patch.D1;
+  }
+
+  if (patch.S1 !== undefined) {
+    cabinetBoard.S1 = patch.S1;
+  }
+
+  if (patch.G1 !== undefined) {
+    cabinetBoard.G1 = patch.G1;
+  }
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+
+  downloadCabinetsFile(
+    project.cabinets ?? []
+  );
+},
+
+
+
+
+
+
+
+
+updateCabinetBoardFormulas: (cabinetId, boardId, patch) => {
+  const state = get();
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (c) => c.id === cabinetId
+  );
+
+  if (!cabinet) return;
+
+  const cabinetBoard = cabinet.boards.find(
+    (cb) => cb.board.id === boardId
+  );
+
+  if (!cabinetBoard) return;
+
+  cabinetBoard.formulas = {
+    ...(cabinetBoard.formulas ?? {}),
+    ...patch
+  };
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
+
+
+
+
+
+
+updateCabinetBoardPlane: (
+  cabinetId,
+  boardId,
+  plane
+) => {
+  const state = get();
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szablonu szafki.');
+    return;
+  }
+
+  const cabinetBoard = cabinet.boards.find(
+    (item) => item.board.id === boardId
+  );
+
+  if (!cabinetBoard) {
+    window.alert('Nie znaleziono formatki.');
+    return;
+  }
+
+  cabinetBoard.board.plane = plane;
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+
+  downloadCabinetsFile(
+    project.cabinets ?? []
+  );
+},
+
+
+
+
+
+
+
+
+
+  updateCabinetBoardFormulas: (cabinetId, boardId, patch) => {
+    const state = get();
+    const project = cloneProject(state.project);
+
+    const cabinet = project.cabinets?.find(
+      (c) => c.id === cabinetId
+    );
+
+    if (!cabinet) return;
+
+    const cabinetBoard = cabinet.boards.find(
+      (cb) => cb.board.id === boardId
+    );
+
+    if (!cabinetBoard) return;
+
+    cabinetBoard.formulas = {
+      ...(cabinetBoard.formulas ?? {}),
+      ...patch
+    };
+
+    set({
+      history: pushHistory(state),
+      future: [],
+      project
+    });
+  },
+
+
+
+
+
+saveCabinetsToFile: async () => {
+  const state = get();
+
+  const data = {
+    version: 1,
+    cabinets: state.project.cabinets ?? []
+  };
+
+  const json = JSON.stringify(data, null, 2);
+
+  try {
+    const showSaveFilePicker = (
+      window as typeof window & {
+        showSaveFilePicker?: (options?: {
+          suggestedName?: string;
+          types?: Array<{
+            description?: string;
+            accept: Record<string, string[]>;
+          }>;
+        }) => Promise<{
+          createWritable: () => Promise<{
+            write: (data: string) => Promise<void>;
+            close: () => Promise<void>;
+          }>;
+        }>;
+      }
+    ).showSaveFilePicker;
+
+    if (!showSaveFilePicker) {
+      window.alert(
+        'Ta przeglądarka nie obsługuje okna "Zapisz jako".'
+      );
+      return;
+    }
+
+    const handle = await showSaveFilePicker({
+      suggestedName: 'szafki.json',
+      types: [
+        {
+          description: 'Plik szafek JSON',
+          accept: {
+            'application/json': ['.json']
+          }
+        }
+      ]
+    });
+
+    const writable = await handle.createWritable();
+
+    await writable.write(json);
+
+    await writable.close();
+
+  } catch (error) {
+    if (
+      error instanceof DOMException &&
+      error.name === 'AbortError'
+    ) {
+      return;
+    }
+
+    console.error(error);
+
+    window.alert(
+      'Nie udało się zapisać pliku szafek.'
+    );
+  }
+},
+
+
+
+
+
+
+
+saveCabinet: (name, dimensions) => {
+  const state = get();
+
+  const selectedBoards = state.project.boards.filter(
+    (board) =>
+      board.cabinetSelected === true &&
+      !board.hiddenInProject
+  );
+
+  if (!selectedBoards.length) {
+    window.alert('Nie znaleziono zaznaczonych formatek.');
+    return;
+  }
+
+  if (!name.trim()) {
+    window.alert('Podaj nazwę szafki.');
+    return;
+  }
+
+  const project = cloneProject(state.project);
+
+  const cabinet = createCabinetTemplate(
+    name.trim(),
+    selectedBoards,
+    dimensions
+  );
+
+  project.cabinets = [
+    ...(project.cabinets ?? []),
+    cabinet
+  ];
+
+  project.boards = project.boards.map((board) =>
+    selectedBoards.some((selected) => selected.id === board.id)
+      ? {
+          ...board,
+          cabinetName: name.trim()
+        }
+      : board
+  );
+
+set({
+  history: pushHistory(state),
+  future: [],
+  project
+});
+},
+
+
+
+
+loadCabinetsFromFile: async (file) => {
+  try {
+    const cabinets = await readCabinetsFile(file);
+
+    const state = get();
+    const project = cloneProject(state.project);
+
+    project.cabinets = cabinets;
+
+    set({
+      history: pushHistory(state),
+      future: [],
+      project
+    });
+
+    window.alert(
+      `Wczytano ${cabinets.length} szafek.`
+    );
+  } catch (error) {
+    console.error(error);
+
+    window.alert(
+      'Nie udało się wczytać pliku szafki.json.'
+    );
+  }
+},
+
+
+
+
+
+updateCabinet: (cabinetId, patch) => {
+  const state = get();
+
+  const project = cloneProject(state.project);
+
+  const cabinet = project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szafki.');
+    return;
+  }
+
+  if (patch.name !== undefined) {
+    cabinet.name = patch.name;
+  }
+
+  if (patch.height !== undefined) {
+    cabinet.baseDimensions.height = patch.height;
+  }
+
+  if (patch.width !== undefined) {
+    cabinet.baseDimensions.width = patch.width;
+  }
+
+  if (patch.depth !== undefined) {
+    cabinet.baseDimensions.depth = patch.depth;
+  }
+
+  if (patch.plinth !== undefined) {
+    cabinet.baseDimensions.plinth = patch.plinth;
+  }
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
+
+
+
+
+
+
+
+
+copyCabinet: (cabinetId, newName) => {
+  const state = get();
+
+  const cabinet = state.project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szafki.');
+    return;
+  }
+
+  if (!newName.trim()) {
+    window.alert('Podaj nazwę kopii szafki.');
+    return;
+  }
+
+  const project = cloneProject(state.project);
+
+  const copiedCabinet: CabinetTemplate = {
+    ...JSON.parse(JSON.stringify(cabinet)),
+    id: createId(),
+    name: newName.trim()
+  };
+
+  project.cabinets = [
+    ...(project.cabinets ?? []),
+    copiedCabinet
+  ];
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
+
+
+
+
+
+
+
+
+
+
+
+deleteCabinet: (cabinetId) => {
+  const state = get();
+
+  const cabinet = state.project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szafki.');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Czy na pewno usunąć szafkę "${cabinet.name}"?`
+  );
+
+  if (!confirmed) return;
+
+  const project = cloneProject(state.project);
+
+  project.cabinets = (
+    project.cabinets ?? []
+  ).filter(
+    (item) => item.id !== cabinetId
+  );
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project
+  });
+},
+
+
+
+
+
+
+addCabinetToProject: (cabinetId, dimensions, position) => {
+  const state = get();
+
+  const cabinet = state.project.cabinets?.find(
+    (item) => item.id === cabinetId
+  );
+
+  if (!cabinet) {
+    window.alert('Nie znaleziono szafki.');
+    return;
+  }
+
+  const project = cloneProject(state.project);
+
+  // =========================================================
+  // ZMIENNE SZAFKI DOSTĘPNE W FORMUŁACH
+  //
+  // H = wysokość
+  // S = szerokość
+  // G = głębokość
+  // C = cokół
+  // =========================================================
+
+  const variables: Record<string, number> = {
+    H: dimensions.height,
+    S: dimensions.width,
+    G: dimensions.depth,
+    C: dimensions.plinth
+  };
+
+  // =========================================================
+  // TWORZENIE FORMATEK Z SZABLONU
+  // =========================================================
+
+const newBoards = cabinet.boards.map(
+  ({ board, D1, S1, G1, formulas }) => {
+
+const newBoard: BoardItem = {
+  ...JSON.parse(JSON.stringify(board)),
+  id: createId(),
+  cabinetName: cabinet.name,
+  cabinetSelected: false,
+  plane: board.plane
+};
+
+
+
+      // =======================================================
+      // D2 = długość formatki
+      // S2 = szerokość formatki
+      // G2 = grubość formatki
+      // X2 = pozycja X
+      // Y2 = pozycja Y
+      // Z2 = pozycja Z
+      // =======================================================
+
+
+const variables: Record<string, number> = {
+  H: dimensions.height,
+  S: dimensions.width,
+  G: dimensions.depth,
+  C: dimensions.plinth,
+
+  D1,
+  S1,
+  G1
+};
+
+
+
+
+const D2 = evaluateCabinetFormula(
+  formulas?.D2,
+  variables,
+  cabinet.boards
+);
+
+const S2 = evaluateCabinetFormula(
+  formulas?.S2,
+  variables,
+  cabinet.boards
+);
+
+const G2 = evaluateCabinetFormula(
+  formulas?.G2,
+  variables,
+  cabinet.boards
+);
+
+const X2 = evaluateCabinetFormula(
+  formulas?.X2,
+  variables,
+  cabinet.boards
+);
+
+const Y2 = evaluateCabinetFormula(
+  formulas?.Y2,
+  variables,
+  cabinet.boards
+);
+
+const Z2 = evaluateCabinetFormula(
+  formulas?.Z2,
+  variables,
+  cabinet.boards
+);
+
+
+      // =======================================================
+      // PODMIANA WYMIARÓW
+      // =======================================================
+
+      if (
+        D2 !== null ||
+        S2 !== null ||
+        G2 !== null
+      ) {
+        newBoard.dimensions = {
+          ...newBoard.dimensions,
+
+          ...(D2 !== null
+            ? { length: D2 }
+            : {}),
+
+          ...(S2 !== null
+            ? { width: S2 }
+            : {}),
+
+          ...(G2 !== null
+            ? { thickness: G2 }
+            : {})
+        };
+      }
+
+      // =======================================================
+      // PODMIANA POŁOŻENIA
+      // =======================================================
+
+      newBoard.anchor = {
+        x: X2 !== null ? X2 : newBoard.anchor.x,
+        y: Y2 !== null ? Y2 : newBoard.anchor.y,
+        z: Z2 !== null ? Z2 : newBoard.anchor.z
+      };
+
+      return newBoard;
+    }
+  );
+
+  // =========================================================
+  // ZNAJDUJEMY MINIMALNY PUNKT CAŁEJ SZAFKI
+  // =========================================================
+
+  const minX = Math.min(
+    ...newBoards.map((board) => board.anchor.x)
+  );
+
+  const minY = Math.min(
+    ...newBoards.map((board) => board.anchor.y)
+  );
+
+  const minZ = Math.min(
+    ...newBoards.map((board) => board.anchor.z)
+  );
+
+  // =========================================================
+  // PRZESUNIĘCIE SZAFKI DO WSKAZANEGO X/Y/Z
+  // =========================================================
+
+  const offset: Vec3 = {
+    x: position.x - minX,
+    y: position.y - minY,
+    z: position.z - minZ
+  };
+
+  // =========================================================
+  // PRZESUWAMY CAŁĄ SZAFKĘ
+  // =========================================================
+
+  const movedBoards = newBoards.map((board) => ({
+    ...board,
+    anchor: {
+      x: board.anchor.x + offset.x,
+      y: board.anchor.y + offset.y,
+      z: board.anchor.z + offset.z
+    }
+  }));
+
+  project.boards.push(...movedBoards);
+
+  renumberBoards(project);
+
+  set({
+    history: pushHistory(state),
+    future: [],
+    project,
+    selectedBoardId: movedBoards[0]?.id ?? null,
+    selectedBoardIds: movedBoards.map(
+      (board) => board.id
+    )
+  });
+},
+
+
+
+
 
 
   moveSelectedBoardsTo: (target) => {

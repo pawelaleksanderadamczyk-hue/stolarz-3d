@@ -131,8 +131,49 @@ hiddenInProject?: boolean;
   rotationQuaternion?: Quaternion4;
   edging: EdgeSelection;
 printSelected?: boolean;
+cabinetSelected?: boolean;
+
 grainDirection?: 'none' | 'vertical' | 'horizontal';
 }
+
+
+export interface CabinetBoard {
+  board: BoardItem;
+
+  // Wymiary formatki w szablonie
+  D1: number;
+  S1: number;
+  G1: number;
+
+  formulas?: {
+    D2?: string;
+    S2?: string;
+    G2?: string;
+    X2?: string;
+    Y2?: string;
+    Z2?: string;
+  };
+}
+
+
+export interface CabinetTemplate {
+  id: string;
+  name: string;
+
+  boards: CabinetBoard[];
+
+  baseDimensions: {
+    height: number;
+    width: number;
+    depth: number;
+    plinth: number;
+  };
+}
+
+
+
+
+
 
 export interface ProjectData {
   version: 1;
@@ -148,7 +189,9 @@ defaultGrainDirections?: {
 };
   measurePoints?: MeasurePoint[];
   boards: BoardItem[];
+  cabinets: CabinetTemplate[];
 }
+
 
 export interface NewBoardForm {
   shape: ShapeType;
