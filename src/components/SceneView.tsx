@@ -1393,7 +1393,26 @@ export function SceneView() {
         camera={{ position: [1200, 900, 1200], fov: 38, near: 2, far: 80000 }}
         gl={{ antialias: true }}
         dpr={[1, Math.min(2, window.devicePixelRatio || 1)]}
-        onPointerMissed={() => { selectBoard(null); useProjectStore.getState().setSelectedBoards([]); }}
+
+
+
+onPointerMissed={() => {
+  selectBoard(null);
+  useProjectStore.getState().setSelectedBoards([]);
+
+  const state = useProjectStore.getState();
+
+  state.project.boards
+    .filter((board) => board.setSelected)
+    .forEach((board) => {
+      state.updateBoard(board.id, {
+        setSelected: false
+      });
+    });
+}}
+
+
+
       >
         <CameraPreset />
         <ambientLight intensity={1.15} />

@@ -799,7 +799,7 @@ addCabinetBoard: (cabinetId) => {
 
     rotationQuaternion: identityQuaternion(),
 
-    cabinetSelected: false,
+cabinetSelected: false,
 
     dimensions: {
       ...structuredClone(sourceBoard.dimensions)
@@ -1060,33 +1060,12 @@ updateCabinetBoardPlane: (
 
 
 
-  updateCabinetBoardFormulas: (cabinetId, boardId, patch) => {
-    const state = get();
-    const project = cloneProject(state.project);
 
-    const cabinet = project.cabinets?.find(
-      (c) => c.id === cabinetId
-    );
 
-    if (!cabinet) return;
 
-    const cabinetBoard = cabinet.boards.find(
-      (cb) => cb.board.id === boardId
-    );
 
-    if (!cabinetBoard) return;
 
-    cabinetBoard.formulas = {
-      ...(cabinetBoard.formulas ?? {}),
-      ...patch
-    };
 
-    set({
-      history: pushHistory(state),
-      future: [],
-      project
-    });
-  },
 
 
 
@@ -1424,6 +1403,7 @@ const newBoard: BoardItem = {
   id: createId(),
   cabinetName: cabinet.name,
   cabinetSelected: false,
+setSelected: true,
   plane: board.plane
 };
 
