@@ -292,7 +292,7 @@ addCabinetToProject: (
 
 
 moveSelectedSetTo: (target: Vec3) => void;
-
+rotateSelectedSet90: () => void;
 
   removeBoard: (id: string) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -1726,6 +1726,98 @@ moveSelectedSetTo: (target) => {
     project
   });
 },
+
+
+
+
+
+  rotateSelectedSet90: () => {
+    const state = get();
+
+    const project = cloneProject(state.project);
+
+    const setBoards = project.boards.filter(
+      (board) =>
+        board.setSelected === true &&
+        !board.hiddenInProject
+    );
+
+    if (!setBoards.length) {
+      window.alert('Nie zaznaczono żadnej formatki do zestawu.');
+      return;
+    }
+
+    // Znajdujemy zielony punkt zestawu.
+    let leading: Vec3 | null = null;
+    let leadingDistance = Infinity;
+
+    for (const board of setBoards) {
+      const vertices = getOuterVertices3D(board);
+
+      for (const vertex of vertices) {
+        const distance =
+          vertex.x * vertex.x +
+          vertex.y * vertex.y +
+          vertex.z * vertex.z;
+
+        if (distance < leadingDistance) {
+          leadingDistance = distance;
+
+          leading = {
+            x: vertex.x,
+            y: vertex.y,
+            z: vertex.z
+          };
+        }
+      }
+    }
+
+    if (!leading) return;
+
+    // Obrót o 90° wokół osi Z.
+    project.boards = project.boards.map((board) => {
+      if (!board.setSelected || board.hiddenInProject) {
+        return board;
+      }
+
+      const dx = board.anchor.x - leading.x;
+      const dz = board.anchor.z - leading.z;
+
+      // Obrót wektora względem zielonego punktu:
+      // X' = Z
+      // Z' = -X
+      const rotatedDx = dz;
+      const rotatedDz = -dx;
+
+      return {
+        ...board,
+
+        anchor: {
+	  x: leading.x + rotatedDx,
+	  y: board.anchor.y,
+	  z: leading.z + rotatedDz
+	},
+
+        rotation: {
+          ...board.rotation,
+          z: (board.rotation.y + 90) % 360
+        },
+
+        rotationQuaternion:
+          rotateQuaternionAroundWorldAxis(
+            board.rotationQuaternion,
+            'y',
+            90
+          )
+      };
+    });
+
+    set({
+      history: pushHistory(state),
+      future: [],
+      project
+    });
+  },
 
 
 

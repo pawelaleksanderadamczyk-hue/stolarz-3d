@@ -1508,6 +1508,7 @@ updateCabinet,
 updateCabinetBoardFormulas,
 removeCabinetBoard,
 moveSelectedSetTo,
+rotateSelectedSet90,
     openAddBoardModal,
     updateProjectAnchor,
     resetView,
@@ -1653,6 +1654,8 @@ const hasSelectedBoards = boards.some(
 <button onClick={() => setSetMoveOpen((prev) => !prev)}>
   Przesuń zestaw
 </button>
+
+
           <button onClick={resetView}>Reset widoku</button>
           <button onClick={undo}>Cofnij</button>
           <button onClick={redo}>Ponów</button>
@@ -1869,6 +1872,18 @@ const hasSelectedBoards = boards.some(
       >
         Przesuń zestaw
       </button>
+
+<button
+  type="button"
+  onClick={() => {
+    rotateSelectedSet90();
+  }}
+>
+  Obróć zestaw 90°
+</button>
+
+
+
     </div>
   </div>
 )}
