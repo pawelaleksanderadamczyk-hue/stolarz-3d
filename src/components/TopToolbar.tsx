@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { COLORS } from '../core/constants';
+import { getOuterVertices3D } from '../core/project';
 import { useProjectStore } from '../store/useProjectStore';
 import type { MaterialIndex, ViewMode } from '../types';
 import { saveProjectToFile } from '../utils/saveProject';
@@ -1457,9 +1458,18 @@ const [cabinetNewHeight, setCabinetNewHeight] = useState(0);
 const [cabinetNewWidth, setCabinetNewWidth] = useState(0);
 const [cabinetNewDepth, setCabinetNewDepth] = useState(0);
 const [cabinetNewPlinth, setCabinetNewPlinth] = useState(0);
+
+
 const [setTargetX, setSetTargetX] = useState(0);
 const [setTargetY, setSetTargetY] = useState(0);
 const [setTargetZ, setSetTargetZ] = useState(0);
+
+
+
+
+
+
+
 
 const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1470,6 +1480,15 @@ const cabinetsFileInputRef =
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
 const [setMoveOpen, setSetMoveOpen] = useState(false);
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1504,6 +1523,58 @@ clearMeasurements,
 
 
   const loadProjectFromFile = useProjectStore((s) => s.loadProjectFromFile);
+
+
+
+
+
+useEffect(() => {
+  if (!setMoveOpen) return;
+
+  const setBoards = project.boards.filter(
+    (board) =>
+      board.setSelected === true &&
+      !board.hiddenInProject
+  );
+
+  if (!setBoards.length) return;
+
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  for (const board of setBoards) {
+    const vertices = getOuterVertices3D(board);
+
+    for (const vertex of vertices) {
+      const distance =
+        vertex.x * vertex.x +
+        vertex.y * vertex.y +
+        vertex.z * vertex.z;
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+
+        nearest = {
+          x: vertex.x,
+          y: vertex.y,
+          z: vertex.z
+        };
+      }
+    }
+  }
+
+  if (!nearest) return;
+
+  setSetTargetX(nearest.x);
+  setSetTargetY(nearest.y);
+  setSetTargetZ(nearest.z);
+}, [setMoveOpen, project.boards]);
+
+
+
+
+
+
 
   return (
     <div className="top-toolbar-wrap">
