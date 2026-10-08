@@ -1581,8 +1581,8 @@ useEffect(() => {
     <div className="top-toolbar-wrap">
       <div className="top-toolbar">
         <div className="toolbar-main-actions">
-          <button onClick={handleSave}>Zapisz projekt</button>
-          <button onClick={() => fileInputRef.current?.click()}>Otwórz projekt</button>
+          <button onClick={handleSave}>ZAPISZ</button>
+          <button onClick={() => fileInputRef.current?.click()}>OTWÓRZ</button>
           <input
             ref={fileInputRef}
             hidden
@@ -1597,9 +1597,9 @@ useEffect(() => {
               }
             }}
           />
-          <button onClick={exportCsv}>Export CSV</button>
-	  <button onClick={printSelectedBoardsToPdf}>Drukuj wybrane</button>
-          <button onClick={() => {setMaterialsOpen((prev) => !prev)}}>Materiał</button>
+          <button onClick={exportCsv}>CSV</button>
+	  <button onClick={printSelectedBoardsToPdf}>WYBRANE</button>
+          <button onClick={() => {setMaterialsOpen((prev) => !prev)}}>MATERIAŁ</button>
 
 <button
   className={measureMode ? 'active' : ''}
@@ -1607,10 +1607,10 @@ useEffect(() => {
     setMeasureMode(!measureMode);
   }}
 >
-  Wymiary
+  WYMIARY
 </button>
 
-          <button onClick={openAddBoardModal}>Dodaj formatkę</button>
+          <button onClick={openAddBoardModal}>FORMATKI</button>
 
 
 
@@ -1633,7 +1633,7 @@ const hasSelectedBoards = boards.some(
   setCabinetFormOpen(true);
 }}
 >
-  Twórz szafkę
+  TWÓRZ SZAFKĘ
 </button>
 
 
@@ -1641,7 +1641,7 @@ const hasSelectedBoards = boards.some(
 <button
   onClick={() => setCabinetsOpen(true)}
 >
-  Szafki
+  DODAJ SZAFKĘ
 </button>
 
 
@@ -1650,15 +1650,15 @@ const hasSelectedBoards = boards.some(
 
 
 
-          <button onClick={() => setAnchorOpen((prev) => !prev)}>Narożnik dodawanych</button>
+          <button onClick={() => setAnchorOpen((prev) => !prev)}>NAROŻNIK</button>
 <button onClick={() => setSetMoveOpen((prev) => !prev)}>
-  Przesuń zestaw
+  ZESTAW
 </button>
 
 
-          <button onClick={resetView}>Reset widoku</button>
-          <button onClick={undo}>Cofnij</button>
-          <button onClick={redo}>Ponów</button>
+          <button onClick={resetView}>RESET WIDOKU</button>
+          <button onClick={undo}>COFNIJ</button>
+          <button onClick={redo}>PONÓW</button>
         </div>
 
         <div className="toolbar-view-tabs">
@@ -1808,19 +1808,11 @@ const hasSelectedBoards = boards.some(
 
 
 {setMoveOpen && (
-  <div className="toolbar-panel toolbar-panel-anchor">
-    <div className="materials-popover-header">
-      <strong>Punkt docelowy zestawu</strong>
+  <div className="toolbar-panel toolbar-panel-anchor set-move-panel">
+    <div className="set-move-row">
 
-      <button
-        className="secondary"
-        onClick={() => setSetMoveOpen(false)}
-      >
-        Zamknij
-      </button>
-    </div>
+      <strong>PUNKT DOCELOWY ZESTAWU FORMATEK</strong>
 
-    <div className="toolbar-group anchor-group anchor-editor">
       <label>
         X
         <input
@@ -1857,32 +1849,32 @@ const hasSelectedBoards = boards.some(
       <button
         type="button"
         onClick={() => {
-  console.log('PRZESUŃ', {
-    x: setTargetX,
-    y: setTargetY,
-    z: setTargetZ
-  });
-
-  moveSelectedSetTo({
-    x: setTargetX,
-    y: setTargetY,
-    z: setTargetZ
-  });
-}}
+          moveSelectedSetTo({
+            x: setTargetX,
+            y: setTargetY,
+            z: setTargetZ
+          });
+        }}
       >
-        Przesuń zestaw
+        PRZESUŃ ZESTAW
       </button>
 
-<button
-  type="button"
-  onClick={() => {
-    rotateSelectedSet90();
-  }}
->
-  Obróć zestaw 90°
-</button>
+      <button
+        type="button"
+        onClick={() => {
+          rotateSelectedSet90();
+        }}
+      >
+        OBRÓĆ ZESTAW 90°
+      </button>
 
-
+      <button
+        type="button"
+        className="secondary"
+        onClick={() => setSetMoveOpen(false)}
+      >
+        ZAMKNIJ
+      </button>
 
     </div>
   </div>

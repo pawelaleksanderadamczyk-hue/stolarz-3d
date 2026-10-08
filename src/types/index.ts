@@ -132,6 +132,10 @@ hiddenInProject?: boolean;
   edging: EdgeSelection;
 printSelected?: boolean;
 cabinetSelected?: boolean;
+setSelected?: boolean;
+
+
+
 
 grainDirection?: 'none' | 'vertical' | 'horizontal';
 }

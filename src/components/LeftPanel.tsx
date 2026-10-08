@@ -629,16 +629,33 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
         </div>
       )}
 
-<button className="copy-btn" onClick={() => copyBoard(board.id)}>Kopiuj</button>
-<button className="delete-btn" onClick={() => removeBoard(board.id)}>Usuń</button>
+<div className="board-action-buttons">
+  <button
+    className="copy-btn"
+    onClick={() => copyBoard(board.id)}
+  >
+    Kopiuj
+  </button>
+
+  <button
+    className="delete-btn"
+    onClick={() => removeBoard(board.id)}
+  >
+    Usuń
+  </button>
+</div>
+
+
+
+
 
 <label
   style={{
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: '12px',
-    marginTop: '14px',
-    marginLeft: '28px',
+    margin: '10px 0 0 0',
     fontSize: '15px',
     cursor: 'pointer'
   }}
@@ -654,22 +671,24 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
     style={{
       width: '18px',
       height: '18px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      margin: 0,
+      flexShrink: 0
     }}
   />
 
-        <span>Wybierz do wydruku</span>
-    </label>
+  <span>Wybierz do wydruku</span>
+</label>
 
 
 
 <label
   style={{
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: '12px',
-    marginTop: '14px',
-    marginLeft: '28px',
+    margin: '10px 0 0 0',
     fontSize: '15px',
     cursor: 'pointer'
   }}
@@ -685,7 +704,9 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
     style={{
       width: '18px',
       height: '18px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      margin: 0,
+      flexShrink: 0
     }}
   />
 
@@ -698,10 +719,10 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
 <label
   style={{
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: '12px',
-    marginTop: '10px',
-    marginLeft: '28px',
+    margin: '10px 0 0 0',
     fontSize: '15px',
     cursor: 'pointer'
   }}
@@ -717,7 +738,9 @@ const commitAnchor = (axis: 'x' | 'y' | 'z') => {
     style={{
       width: '18px',
       height: '18px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      margin: 0,
+      flexShrink: 0
     }}
   />
 

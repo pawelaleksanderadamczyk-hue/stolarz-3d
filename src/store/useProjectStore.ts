@@ -10,7 +10,11 @@ import {
   rotateQuaternionAroundWorldAxis,
   getOuterVertices3D
 } from '../core/project';
-import { createCabinetTemplate } from '../core/cabinets';
+
+import {
+  createCabinetTemplate
+} from '../core/cabinets';
+
 import type {
   BoardItem,
   CabinetBoard,
@@ -144,6 +148,56 @@ function createId() {
 
   return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
+
+
+
+function getCabinetD1S1(board: BoardItem): {
+  D1: number;
+  S1: number;
+} {
+  const d = board.dimensions;
+
+  if ('length' in d && 'width' in d) {
+    return {
+      D1: Number(d.length),
+      S1: Number(d.width)
+    };
+  }
+
+  if ('length1' in d && 'width1' in d) {
+    return {
+      D1: Number(d.length1),
+      S1: Number(d.width1)
+    };
+  }
+
+  if ('lengthLeft' in d && 'width' in d) {
+    return {
+      D1: Number(d.lengthLeft),
+      S1: Number(d.width)
+    };
+  }
+
+  if ('height' in d && 'width' in d) {
+    return {
+      D1: Number(d.height),
+      S1: Number(d.width)
+    };
+  }
+
+  return {
+    D1: 0,
+    S1: 0
+  };
+}
+
+
+
+
+
+
+
+
 
 
 interface RotationEditState {
@@ -842,9 +896,9 @@ cabinetSelected: false,
   const newCabinetBoard: CabinetBoard = {
     board: newBoard,
 
-    D1: Number(newBoard.dimensions.length),
-    S1: Number(newBoard.dimensions.width),
-    G1: Number(newBoard.dimensions.thickness),
+    D1: getCabinetD1S1(newBoard).D1,
+S1: getCabinetD1S1(newBoard).S1,
+G1: Number(newBoard.dimensions.thickness),
 
     formulas: {
       D2: '',

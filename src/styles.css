@@ -39,28 +39,43 @@ label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 }
 .top-toolbar {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 12px 14px;
+  gap: 25px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 6px;
   background: white;
+  flex-wrap: nowrap;
 }
 .toolbar-main-actions {
   display: flex;
-  gap: 10px;
+  gap: 4px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 .toolbar-view-tabs {
   display: flex;
-  gap: 10px;
+  gap: 4px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
+
+.toolbar-view-tabs button {
+  height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+
+
+
+
+
 .toolbar-view-tabs .active { background: #ffffff; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
 .toolbar-panel {
   margin: 0 14px 14px;
-  background: #ffffff;
+  background: #fff000;
   border: 2px solid #cfdbea;
   border-radius: 20px;
   box-shadow: 0 14px 40px rgba(20, 42, 74, 0.12);
@@ -193,6 +208,18 @@ label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .left-panel button {
   flex-shrink: 0;
 }
+
+
+.top-toolbar button {
+  height: 36px;
+  padding: 0 11px;
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+
 
 .edging-extra { display: flex; flex-direction: column; gap: 8px; margin-top: -4px; }
 .left-panel { position: relative; }
@@ -707,4 +734,102 @@ button.active {
 
 .cabinet-modal {
   border: 1px solid #c7d2fe;
+}
+
+
+.set-move-panel {
+  width: auto;
+  margin: 0 14px 14px;
+  padding: 10px 14px;
+}
+
+.set-move-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+}
+
+.set-move-row strong {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 16px;
+  margin: 0 8px 0 0;
+}
+
+.set-move-row label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.set-move-row input {
+  width: 90px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.set-move-row button {
+  height: 36px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Checkboxy formatki */
+.board-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 0 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.board-checkbox-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.board-checkbox-row span {
+  line-height: 18px;
+}
+
+/* Kopiuj / Usuń */
+.board-action-buttons {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.board-action-buttons button {
+  width: 50%;
+  height: 40px;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Kopiuj */
+.board-action-buttons .copy-btn {
+  color: #ffffff;
+  background: #2878b9;
+  border: 1px solid #2878b9;
+}
+
+/* Usuń */
+.board-action-buttons .delete-btn {
+  color: #ffffff;
+  background: #d32f2f;
+  border: 1px solid #d32f2f;
 }
